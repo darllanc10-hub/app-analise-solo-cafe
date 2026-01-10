@@ -47,11 +47,109 @@ st.success(f"Calcário: {calcario_planta:.0f} g por planta")
 st.warning(f"Gesso agrícola: {gesso_planta:.0f} g por planta")
 
 st.markdown("---")
+# ==============================
+# CADASTRO DE ADUBOS (PADRÃO)
+# ==============================
 
+adubos = {
+    "Ureia 46% (fertirrigação)": {
+        "dose": 22,
+        "unidade": "g/planta",
+        "meses": ["Set", "Out", "Nov", "Dez", "Jan", "Fev", "Mar"]
+    },
+    "Nitrato de Amônio": {
+        "dose": 22,
+        "unidade": "g/planta",
+        "meses": ["Set", "Out", "Nov", "Dez", "Jan", "Fev", "Mar"]
+    },
+    "Ureia Sulfatada": {
+        "dose": 37,
+        "unidade": "g/planta",
+        "meses": ["Set", "Out", "Nov", "Dez", "Jan", "Fev", "Mar"]
+    },
+    "26-00-26": {
+        "dose": 45,
+        "unidade": "g/planta",
+        "meses": ["Out", "Dez", "Fev"]
+    },
+    "20-10-05 (florada)": {
+        "dose": 100,
+        "unidade": "g/planta",
+        "meses": ["Jun", "Ago"]
+    },
+    "19-04-19 (granação)": {
+        "dose": 100,
+        "unidade": "g/planta",
+        "meses": ["Out", "Dez", "Fev", "Abr"]
+    },
+    "Fertium Produção": {
+        "dose": 150,
+        "unidade": "g/planta",
+        "meses": ["Out", "Dez", "Fev", "Abr"]
+    },
+    "MAP purificado": {
+        "dose": 13,
+        "unidade": "g/planta",
+        "meses": ["Set", "Nov", "Jan"]
+    },
+    "Petrum (Vittia)": {
+        "dose": 12,
+        "unidade": "ml/planta",
+        "meses": ["Set", "Nov", "Jan"]
+    },
+    "Cloreto de Potássio": {
+        "dose": 20,
+        "unidade": "g/planta",
+        "meses": ["Out", "Dez", "Fev"]
+    },
+    "Sulfato de Magnésio": {
+        "dose": 15,
+        "unidade": "g/planta",
+        "meses": ["Nov", "Jan"]
+    },
+    "Nitrato de Cálcio": {
+        "dose": 20,
+        "unidade": "g/planta",
+        "meses": ["Nov", "Jan"]
+    },
+    "Caltimag (manual)": {
+        "dose": 100,
+        "unidade": "g/planta",
+        "meses": ["Mar", "Set"]
+    },
+    "Boro": {
+        "dose": 2,
+        "unidade": "L/ha",
+        "meses": ["Jun"]
+    },
+    "Zinco": {
+        "dose": 2,
+        "unidade": "L/ha",
+        "meses": ["Nov"]
+    },
+    "Multicafé Conilon": {
+        "dose": 15,
+        "unidade": "L/ha",
+        "meses": ["Set", "Nov", "Jan", "Mar"]
+    },
+    "Biogrow Mol": {
+        "dose": 20,
+        "unidade": "L/ha",
+        "meses": ["Out"]
+    }
+}
 st.markdown("### 📅 Tabela de Distribuição Anual (g por planta)")
 
 meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
 tabela = pd.DataFrame(index=meses)
+
+for nome, info in adubos.items():
+    tabela[nome] = [
+        f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
+        for mes in meses
+    ]
+
+st.dataframe(tabela, use_container_width=True)
 
 dose_20_10_05 = 100
 dose_19_04_19 = 100
