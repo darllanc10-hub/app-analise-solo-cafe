@@ -1,7 +1,37 @@
 
 import streamlit as st
 import pandas as pd
+st.title("🌱 Interpretação de Análise de Solo – Café")
 
+st.markdown("### 🔧 Tipo de Aplicação")
+tipo_aplicacao = st.radio(
+    "Selecione a modalidade de adubação:",
+    ["Fertirrigação", "Manual"]
+)
+
+st.divider()
+st.markdown("### 🧪 Dados da Análise de Solo")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    ph = st.number_input("pH", value=5.5)
+    v = st.number_input("V (%)", value=60.0)
+    m = st.number_input("m (%)", value=5.0)
+    mo = st.number_input("Matéria Orgânica (%)", value=2.5)
+
+with col2:
+    ca = st.number_input("Cálcio (cmolc/dm³)", value=2.0)
+    mg = st.number_input("Magnésio (cmolc/dm³)", value=0.8)
+    k = st.number_input("Potássio (cmolc/dm³)", value=0.25)
+    s = st.number_input("Enxofre (mg/dm³)", value=10.0)
+
+with col3:
+    p = st.number_input("Fósforo (mg/dm³)", value=8.0)
+    b = st.number_input("Boro (mg/dm³)", value=0.3)
+    zn = st.number_input("Zinco (mg/dm³)", value=1.0)
+    cu = st.number_input("Cobre (mg/dm³)", value=0.5)
+    mn = st.number_input("Manganês (mg/dm³)", value=20.0)
 st.set_page_config(layout="centered")
 
 st.title("☕ Interpretação de Análise de Solo – Café")
