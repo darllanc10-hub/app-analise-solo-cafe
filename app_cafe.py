@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-# ---------------- CONFIGURAÇÃO DA PÁGINA ----------------
+# ---------------- CONFIGURAÇÃO ----------------
 st.set_page_config(
     page_title="Análise de Solo - Café",
     layout="wide"
@@ -9,13 +9,66 @@ st.set_page_config(
 
 st.title("☕ Análise de Solo – Café")
 
-# ---------------- SELEÇÃO DA MODALIDADE ----------------
+# =====================================================
+# 📌 CADASTRO DO PRODUTOR
+# =====================================================
+st.header("👨‍🌾 Cadastro do Produtor")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    produtor = st.text_input("Nome do produtor")
+with col2:
+    propriedade = st.text_input("Propriedade")
+with col3:
+    municipio = st.text_input("Município")
+
+# =====================================================
+# 🌱 DESCRIÇÃO DA ÁREA
+# =====================================================
+st.header("🌱 Descrição da Área")
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    area_ha = st.number_input("Área (ha)", min_value=0.0)
+with col2:
+    plantas_ha = st.number_input("Plantas por ha", min_value=0)
+with col3:
+    variedade = st.text_input("Variedade")
+with col4:
+    idade = st.number_input("Idade da lavoura (anos)", min_value=0)
+
+# =====================================================
+# 🧪 CORREÇÃO DO SOLO
+# =====================================================
+st.header("🧪 Correção do Solo")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    calcario = st.number_input("Calcário (g por planta)", min_value=0.0)
+    if calcario > 0:
+        st.success(f"Calcário: {calcario:.0f} g por planta")
+
+with col2:
+    gesso = st.number_input("Gesso agrícola (g por planta)", min_value=0.0)
+    if gesso > 0:
+        st.warning(f"Gesso agrícola: {gesso:.0f} g por planta")
+
+# =====================================================
+# 🚜 MODALIDADE DE APLICAÇÃO
+# =====================================================
+st.header("🚜 Modalidade de Aplicação")
+
 tipo_aplicacao = st.radio(
-    "Selecione a modalidade de aplicação:",
+    "Escolha a modalidade:",
     ["Manual", "Fertirrigação"]
 )
 
-# ---------------- ADUBOS CADASTRADOS ----------------
+# =====================================================
+# 🧂 ADUBOS CADASTRADOS
+# =====================================================
 adubos = {
     "Ureia 46%": {
         "dose": 120,
@@ -49,10 +102,10 @@ adubos = {
     }
 }
 
-st.divider()
-
-# ---------------- SELEÇÃO E EDIÇÃO ----------------
-st.subheader("📋 Seleção e ajuste de adubos")
+# =====================================================
+# 📋 SELEÇÃO E AJUSTE
+# =====================================================
+st.header("📋 Seleção e Ajuste de Adubos")
 
 adubos_ativos = {}
 
@@ -80,10 +133,10 @@ for nome, info in adubos.items():
             "meses": info["meses"]
         }
 
-st.divider()
-
-# ---------------- TABELA DE DISTRIBUIÇÃO ----------------
-st.subheader("📅 Tabela de Distribuição Anual (g por planta)")
+# =====================================================
+# 📅 TABELA ANUAL
+# =====================================================
+st.header("📅 Tabela de Distribuição Anual (por planta)")
 
 meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
          "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
