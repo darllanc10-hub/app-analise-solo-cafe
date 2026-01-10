@@ -175,8 +175,10 @@ st.markdown("### 🧾 Seleção e Ajuste de Adubos")
 
 adubos_ativos = {}
 
-for nome, info in adubos.items():
-    if info["modalidade"] != tipo_aplicacao:
+for nome, informacoes in adubos.items():
+    modalidade_adubo = informacoes.get("modalidade", "Ambos")
+
+    if modalidade_adubo != "Ambos" and modalidade_adubo != tipo_aplicacao:
         continue
 
     col1, col2 = st.columns([4,2])
