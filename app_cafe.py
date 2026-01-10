@@ -151,143 +151,61 @@ adubos = {
         "modalidade": "Fertirrigação",
         "meses": ["Jan", "Fev"]
     },
-    "19-04-19": {
-        "dose": 100,
-        "unidade": "g/planta",
-        "modalidade": "Manual",
-        "meses": ["Out", "Nov", "Dez"]
-    },
-    "Fertium Produção": {
-        "dose": 150,
-        "unidade": "g/planta",
-        "modalidade": "Manual",
-        "meses": ["Out", "Dez", "Fev"]
-    },
-        "meses": ["Set", "Nov", "Jan"]
-    },
-    "Petrum (Vittia)": {
-        "dose": 12,
-        "unidade": "ml/planta",
-        "meses": ["Set", "Nov", "Jan"]
-    },
-    "Cloreto de Potássio": {
-        "dose": 20,
-        "unidade": "g/planta",
-        "meses": ["Out", "Dez", "Fev"]
-    },
-    "Sulfato de Magnésio": {
-        "dose": 15,
-        "unidade": "g/planta",
-        "meses": ["Nov", "Jan"]
-    },
-    "Nitrato de Cálcio": {
-        "dose": 20,
 import streamlit as st
 import pandas as pd
 
-# =========================
-# CONFIGURAÇÃO DA PÁGINA
-# =========================
+# ---------------- CONFIGURAÇÃO DA PÁGINA ----------------
 st.set_page_config(
-    page_title="Análise de Solo – Café",
-    layout="centered"
+    page_title="Análise de Solo - Café",
+    layout="wide"
 )
 
-st.title("🌱 Análise e Planejamento de Adubação – Café")
+st.title("☕ Análise de Solo – Café")
 
-# =========================
-# DADOS FIXOS DO SISTEMA
-# =========================
+# ---------------- SELEÇÃO DA MODALIDADE ----------------
+tipo_aplicacao = st.radio(
+    "Selecione a modalidade de aplicação:",
+    ["Manual", "Fertirrigação"]
+)
 
-# Adubos cadastrados
+# ---------------- ADUBOS CADASTRADOS ----------------
 adubos = {
-    "Ureia (46%)": {
-        "dose": 10,
+    "Ureia 46%": {
+        "dose": 120,
         "unidade": "g/planta",
         "modalidade": "Fertirrigação",
-        "meses": ["Jan", "Fev", "Mar"]
+        "meses": ["Jan", "Fev", "Mar", "Abr"]
     },
-    "26-00-26": {
-        "dose": 12,
+    "MAP": {
+        "dose": 80,
         "unidade": "g/planta",
-        "modalidade": "Fertirrigação",
-        "meses": ["Jan", "Fev"]
+        "modalidade": "Manual",
+        "meses": ["Set", "Out"]
     },
-    "19-04-19": {
+    "KCl": {
         "dose": 100,
         "unidade": "g/planta",
         "modalidade": "Manual",
-        "meses": ["Out", "Nov", "Dez"]
-    },
-    "Fertium Produção": {
-        "dose": 150,
-        "unidade": "g/planta",
-        "modalidade": "Manual",
-        "meses": ["Out", "Dez", "Fev"]
-    },
-    "Nitrato de Cálcio": {
-        "dose": 13,
-        "unidade": "g/planta",
-        "modalidade": "Fertirrigação",
-        "meses": ["Jan", "Fev"]
-    },
-    "Sulfato de Magnésio": {
-        "dose": 6,
-        "unidade": "g/planta",
-        "modalidade": "Fertirrigação",
-        "meses": ["Abr", "Mai"]
+        "meses": ["Nov", "Dez"]
     },
     "Boro": {
         "dose": 2,
-        "unidade": "L/ha",
-        "modalidade": "Fertirrigação",
-        "meses": ["Jun"]
+        "unidade": "g/planta",
+        "modalidade": "Manual",
+        "meses": ["Jan"]
     },
     "Zinco": {
         "dose": 2,
-        "unidade": "L/ha",
-        "modalidade": "Fertirrigação",
-        "meses": ["Nov"]
-    },
-    "Multicafé Conilon": {
-        "dose": 15,
-        "unidade": "L/ha",
-        "modalidade": "Fertirrigação",
-        "meses": ["Nov", "Jan", "Mar"]
-    },
-    "Biogrow Mol": {
-        "dose": 20,
-        "unidade": "L/ha",
-        "modalidade": "Fertirrigação",
-        "meses": ["Fora"]
+        "unidade": "g/planta",
+        "modalidade": "Manual",
+        "meses": ["Fev"]
     }
 }
 
-# =========================
-# CALAGEM E GESSAGEM
-# =========================
-st.subheader("🪨 Correção do Solo")
+st.divider()
 
-calcario = st.number_input("Calcário (g por planta)", value=214.0)
-gesso = st.number_input("Gesso agrícola (g por planta)", value=64.0)
-
-st.success(f"Calcário: {calcario:.0f} g por planta")
-st.warning(f"Gesso agrícola: {gesso:.0f} g por planta")
-
-# =========================
-# SELEÇÃO DE MODALIDADE
-# =========================
-st.subheader("🚜 Modalidade de Aplicação")
-
-tipo_aplicacao = st.radio(
-    "Escolha a modalidade:",
-    ["Fertirrigação", "Manual"]
-)
-
-# =========================
-# SELEÇÃO E EDIÇÃO DE ADUBOS
-# =========================
-st.subheader("🧪 Seleção e Ajuste de Adubos")
+# ---------------- SELEÇÃO E EDIÇÃO ----------------
+st.subheader("📋 Seleção e ajuste de adubos")
 
 adubos_ativos = {}
 
@@ -301,7 +219,7 @@ for nome, info in adubos.items():
         ativo = st.checkbox(nome, value=True)
 
     with col2:
-        nova_dose = st.number_input(
+        dose_editada = st.number_input(
             f"Dose ({info['unidade']})",
             value=float(info["dose"]),
             step=1.0,
@@ -310,15 +228,15 @@ for nome, info in adubos.items():
 
     if ativo:
         adubos_ativos[nome] = {
-            "dose": nova_dose,
+            "dose": dose_editada,
             "unidade": info["unidade"],
             "meses": info["meses"]
         }
 
-# =========================
-# TABELA DE DISTRIBUIÇÃO ANUAL
-# =========================
-st.subheader("📅 Tabela de Distribuição Anual")
+st.divider()
+
+# ---------------- TABELA DE DISTRIBUIÇÃO ----------------
+st.subheader("📅 Tabela de Distribuição Anual (g por planta)")
 
 meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
          "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
@@ -332,8 +250,3 @@ for nome, info in adubos_ativos.items():
     ]
 
 st.dataframe(tabela, use_container_width=True)
-
-# =========================
-# FINAL
-# =========================
-st.success("✅ Planejamento gerado com sucesso")
