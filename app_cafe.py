@@ -171,23 +171,15 @@ adubos = {
 
 st.markdown("### 📅 Tabela de Distribuição Anual (g por planta)")
 
-meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
-tabela = pd.DataFrame(index=meses)
-
-for nome, info in adubos.items():
-    tabela[nome] = [
-        f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
-        for mes in meses
-    ]
 st.markdown("### 🧾 Seleção e Ajuste de Adubos")
 
 adubos_ativos = {}
 
-for nome, info in adubos_ativos.items():
+for nome, info in adubos.items():
     if info["modalidade"] != tipo_aplicacao:
         continue
 
-    col1, col2 = st.columns([3,1])
+    col1, col2 = st.columns([4,2])
 
     with col1:
         ativo = st.checkbox(nome, value=True)
@@ -196,7 +188,8 @@ for nome, info in adubos_ativos.items():
         dose_editada = st.number_input(
             f"Dose ({info['unidade']})",
             value=float(info["dose"]),
-            key=nome
+            step=1.0,
+            key=f"dose_{nome}"
         )
 
     if ativo:
@@ -204,31 +197,16 @@ for nome, info in adubos_ativos.items():
             **info,
             "dose": dose_editada
         }
-st.dataframe(tabela, use_container_width=True)
 
-dose_20_10_05 = 100
-dose_19_04_19 = 100
-dose_fertium = 150
+st.markdown("### 📅 Tabela de Distribuição Anual")
 
-mes_florada = ["Jun","Jul","Ago"]
-mes_granacao = ["Out","Nov","Dez","Jan","Fev","Mar","Abr"]
+meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
+tabela = pd.DataFrame(index=meses)
 
-tabela["20-10-05"] = [
-    dose_20_10_05 if m in mes_florada and meses.index(m) % 2 == 0 else ""
-    for m in meses
-]
-
-tabela["19-04-19"] = [
-    dose_19_04_19 if m in mes_granacao and meses.index(m) % 2 == 0 else ""
-    for m in meses
-]
-
-tabela["Fertium Produção"] = [
-    dose_fertium if m in mes_granacao and meses.index(m) % 2 == 0 else ""
-    for m in meses
-]
+for nome, info in adubos_ativos.items():
+    tabela[nome] = [
+        f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
+        for mes in meses
+    ]
 
 st.dataframe(tabela, use_container_width=True)
-
-st.markdown("---")
-st.caption("Resultado expresso em g por planta. Aplicações com residual de 2 meses.")
