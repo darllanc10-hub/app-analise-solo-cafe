@@ -168,6 +168,7 @@ adubos = {
         "meses": ["Out"]
     }
 }
+
 st.markdown("### 📅 Tabela de Distribuição Anual (g por planta)")
 
 meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
@@ -178,7 +179,31 @@ for nome, info in adubos.items():
         f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
         for mes in meses
     ]
+st.markdown("### 🧾 Seleção e Ajuste de Adubos")
 
+adubos_ativos = {}
+
+for nome, info in adubos_ativos.items():
+    if info["modalidade"] != tipo_aplicacao:
+        continue
+
+    col1, col2 = st.columns([3,1])
+
+    with col1:
+        ativo = st.checkbox(nome, value=True)
+
+    with col2:
+        dose_editada = st.number_input(
+            f"Dose ({info['unidade']})",
+            value=float(info["dose"]),
+            key=nome
+        )
+
+    if ativo:
+        adubos_ativos[nome] = {
+            **info,
+            "dose": dose_editada
+        }
 st.dataframe(tabela, use_container_width=True)
 
 dose_20_10_05 = 100
