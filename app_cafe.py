@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 
-# =============================
+# ===============================
 # CONFIGURAÇÃO DA PÁGINA
-# =============================
+# ===============================
 st.set_page_config(
     page_title="Análise de Solo – Café",
     layout="centered"
@@ -11,100 +11,101 @@ st.set_page_config(
 
 st.title("🌱 Análise de Solo – Café")
 
-# =============================
-# DADOS DO PRODUTOR / ÁREA
-# =============================
-st.header("👨‍🌾 Identificação da Área")
+# ===============================
+# DADOS DA ÁREA / PRODUTOR
+# ===============================
+st.header("📋 Identificação")
 
 produtor = st.text_input("Produtor")
 area = st.text_input("Área / Talhão")
 cultura = st.selectbox("Cultura", ["Café Conilon", "Café Arábica"])
-plantas_ha = st.number_input("Plantas por hectare", min_value=1000, value=3000, step=100)
+plantas_ha = st.number_input("Plantas por hectare", value=3000, step=100)
 
-# =============================
+# ===============================
 # PARÂMETROS QUÍMICOS
-# =============================
+# ===============================
 st.header("🧪 Parâmetros Químicos do Solo")
 
-ph = st.number_input("pH (H₂O)", value=5.2, step=0.1)
-v_atual = st.number_input("V% atual", value=45.0, step=1.0)
-v_desejado = st.number_input("V% desejado", value=60.0, step=1.0)
+ph = st.number_input("pH", value=5.0, step=0.1)
+v_atual = st.number_input("Saturação por Bases (V%)", value=40.0, step=1.0)
+v_desejado = 60.0
 
-ca = st.number_input("Cálcio (Ca) cmolc/dm³", value=1.5, step=0.1)
-mg = st.number_input("Magnésio (Mg) cmolc/dm³", value=0.4, step=0.1)
-al = st.number_input("Alumínio (Al) cmolc/dm³", value=0.2, step=0.1)
+ca = st.number_input("Cálcio (Ca)", value=1.5, step=0.1)
+mg = st.number_input("Magnésio (Mg)", value=0.5, step=0.1)
+k = st.number_input("Potássio (K)", value=80.0, step=5.0)
+p = st.number_input("Fósforo (P)", value=8.0, step=1.0)
 
-st.header("🌾 Micronutrientes (mg/dm³)")
-fe = st.number_input("Ferro (Fe)", value=50.0)
-zn = st.number_input("Zinco (Zn)", value=2.0)
-cu = st.number_input("Cobre (Cu)", value=1.0)
-mn = st.number_input("Manganês (Mn)", value=20.0)
-b = st.number_input("Boro (B)", value=0.3)
+st.subheader("Micronutrientes")
+zn = st.number_input("Zinco (Zn)", value=1.2, step=0.1)
+b = st.number_input("Boro (B)", value=0.2, step=0.05)
+cu = st.number_input("Cobre (Cu)", value=0.8, step=0.1)
+mn = st.number_input("Manganês (Mn)", value=20.0, step=1.0)
+fe = st.number_input("Ferro (Fe)", value=120.0, step=5.0)
 
-st.header("🌱 Matéria Orgânica")
+st.header("🌾 Matéria Orgânica")
 mo = st.number_input("Matéria Orgânica (%)", value=1.8, step=0.1)
 
-# =============================
+# ===============================
 # MODALIDADE DE APLICAÇÃO
-# =============================
+# ===============================
 st.header("🚜 Modalidade de Aplicação")
-modalidade = st.selectbox(
-    "Escolha a modalidade",
-    ["Manual", "Fertirrigação"]
-)
+modalidade = st.selectbox("Escolha a modalidade", ["Manual", "Fertirrigação"])
 
-# =============================
+# ===============================
 # CÁLCULO DE CALAGEM E GESSAGEM
-# =============================
+# ===============================
 st.header("🧮 Cálculo de Calagem e Gessagem")
 
-calcario_t_ha = 0.0
-gesso_t_ha = 0.0
+calcario_t_ha = max((v_desejado - v_atual) * 0.04, 0)
+gesso_t_ha = calcario_t_ha * 0.3
 
-if v_atual < v_desejado:
-    calcario_t_ha = round((v_desejado - v_atual) * 0.05, 2)
+calcario_g_planta = (calcario_t_ha * 1000) / plantas_ha
+gesso_g_planta = (gesso_t_ha * 1000) / plantas_ha
 
-if ca < 2.0:
-    gesso_t_ha = 1.0
+# ===============================
+# RESULTADO DA CORREÇÃO DO SOLO
+# ===============================
+st.header("📊 Resultado da Correção do Solo")
 
-kg_calcario_ha = calcario_t_ha * 1000
-kg_gesso_ha = gesso_t_ha * 1000
+st.success(f"🪨 Calcário: {calcario_g_planta:.0f} g por planta")
+st.warning(f"🟡 Gesso agrícola: {gesso_g_planta:.0f} g por planta")
 
-g_calcario_planta = (kg_calcario_ha * 1000) / plantas_ha if plantas_ha > 0 else 0
-g_gesso_planta = (kg_gesso_ha * 1000) / plantas_ha if plantas_ha > 0 else 0
-
-# =============================
-# RESULTADO FINAL DA CORREÇÃO
-# =============================
-st.subheader("📊 Resultado da Correção do Solo")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.success("🪨 Calcário")
-    st.write(f"**Dose:** {calcario_t_ha:.2f} t/ha")
-    st.write(f"{kg_calcario_ha:.0f} kg/ha")
-    st.write(f"{g_calcario_planta:.0f} g por planta")
-
-with col2:
-    st.warning("🟡 Gesso agrícola")
-    st.write(f"**Dose:** {gesso_t_ha:.2f} t/ha")
-    st.write(f"{kg_gesso_ha:.0f} kg/ha")
-    st.write(f"{g_gesso_planta:.0f} g por planta")
-
-# =============================
-# ADUBOS (EDITÁVEIS NA TABELA)
-# =============================
+# ===============================
+# ADUBOS DISPONÍVEIS
+# ===============================
 st.header("🧾 Seleção e Ajuste de Adubos")
 
 adubos = {
-    "Ureia 46%": {"dose": 10, "unidade": "g/planta", "modalidade": "Fertirrigação"},
-    "19-04-19": {"dose": 15, "unidade": "g/planta", "modalidade": "Manual"},
-    "20-10-05": {"dose": 20, "unidade": "g/planta", "modalidade": "Manual"},
-    "MAP": {"dose": 5, "unidade": "g/planta", "modalidade": "Fertirrigação"},
-    "Cloreto de Potássio": {"dose": 8, "unidade": "g/planta", "modalidade": "Fertirrigação"},
-    "Caltimag": {"dose": 10, "unidade": "g/planta", "modalidade": "Manual"},
-    "Multicafé Conilon": {"dose": 15, "unidade": "g/planta", "modalidade": "Manual"}
+    "Ureia 46%": {
+        "dose": 120,
+        "unidade": "g/planta",
+        "modalidade": "Fertirrigação",
+        "meses": ["Out", "Nov", "Jan"]
+    },
+    "MAP": {
+        "dose": 80,
+        "unidade": "g/planta",
+        "modalidade": "Fertirrigação",
+        "meses": ["Set"]
+    },
+    "Cloreto de Potássio": {
+        "dose": 100,
+        "unidade": "g/planta",
+        "modalidade": "Fertirrigação",
+        "meses": ["Dez", "Jan"]
+    },
+    "Caltimag": {
+        "dose": 150,
+        "unidade": "g/planta",
+        "modalidade": "Manual",
+        "meses": ["Mar"]
+    },
+    "Multicafé Conilon": {
+        "dose": 200,
+        "unidade": "g/planta",
+        "modalidade": "Manual",
+        "meses": ["Set", "Nov"]
+    }
 }
 
 adubos_ativos = {}
@@ -116,10 +117,10 @@ for nome, info in adubos.items():
     col1, col2 = st.columns([3, 2])
 
     with col1:
-        ativo = st.checkbox(nome, value=True, key=f"chk_{nome}")
+        ativo = st.checkbox(nome, value=True)
 
     with col2:
-        dose = st.number_input(
+        dose_editada = st.number_input(
             f"Dose ({info['unidade']})",
             value=float(info["dose"]),
             step=1.0,
@@ -128,14 +129,14 @@ for nome, info in adubos.items():
 
     if ativo:
         adubos_ativos[nome] = {
-            "dose": dose,
-            "unidade": info["unidade"]
+            **info,
+            "dose": dose_editada
         }
 
-# =============================
+# ===============================
 # TABELA DE DISTRIBUIÇÃO
-# =============================
-st.header("📅 Tabela de Distribuição Anual")
+# ===============================
+st.header("📅 Tabela de Distribuição Anual (g por planta)")
 
 meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
          "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
@@ -143,17 +144,19 @@ meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
 tabela = pd.DataFrame(index=meses)
 
 for nome, info in adubos_ativos.items():
-    tabela[nome] = [f"{info['dose']} {info['unidade']}" for _ in meses]
+    tabela[nome] = [
+        f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
+        for mes in meses
+    ]
 
 st.dataframe(tabela, use_container_width=True)
 
-# =============================
-# UPLOAD DA FOTO (ETAPA C – PREPARADO)
-# =============================
-st.header("📸 Foto da Análise de Solo (opcional)")
-st.file_uploader(
-    "Envie a foto ou PDF da análise (em breve leitura automática)",
-    type=["jpg", "png", "jpeg", "pdf"]
-)
+# ===============================
+# UPLOAD DE FOTO (ETAPA C)
+# ===============================
+st.header("📷 Upload da Análise de Solo (em teste)")
 
-st.info("🔜 Em breve: leitura automática da análise via imagem (OCR).")
+st.file_uploader(
+    "Envie uma foto da análise de solo (PDF ou imagem)",
+    type=["png", "jpg", "jpeg", "pdf"]
+)
