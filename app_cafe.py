@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # =====================================================
-# CONFIGURAÇÃO
+# CONFIGURAÇÃO GERAL
 # =====================================================
 st.set_page_config(
     page_title="Análise de Solo – Café",
@@ -12,7 +12,7 @@ st.set_page_config(
 st.title("☕ Análise de Solo e Adubação – Café")
 
 # =====================================================
-# CADASTRO DO PRODUTOR
+# 1️⃣ CADASTRO DO PRODUTOR
 # =====================================================
 st.header("👨‍🌾 Cadastro do Produtor")
 
@@ -25,7 +25,7 @@ with c3:
     municipio = st.text_input("Município")
 
 # =====================================================
-# DESCRIÇÃO DA ÁREA
+# 2️⃣ DESCRIÇÃO DA ÁREA
 # =====================================================
 st.header("🌱 Descrição da Área")
 
@@ -40,7 +40,70 @@ with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
 
 # =====================================================
-# CORREÇÃO DO SOLO
+# 3️⃣ ETAPA B – ANÁLISE DE SOLO
+# =====================================================
+st.header("🧪 Análise de Solo")
+
+st.markdown("### 📌 Parâmetros Químicos")
+
+c1, c2, c3 = st.columns(3)
+with c1:
+    ph = st.number_input("pH", step=0.1)
+with c2:
+    v_percent = st.number_input("V% (Saturação por bases)", step=1.0)
+with c3:
+    m_percent = st.number_input("m% (Saturação por alumínio)", step=1.0)
+
+st.markdown("### 🌱 Macronutrientes")
+
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1:
+    ca = st.number_input("Cálcio (Ca)", step=0.1)
+with c2:
+    mg = st.number_input("Magnésio (Mg)", step=0.1)
+with c3:
+    k = st.number_input("Potássio (K)", step=0.1)
+with c4:
+    p = st.number_input("Fósforo (P)", step=0.1)
+with c5:
+    s = st.number_input("Enxofre (S)", step=0.1)
+
+st.markdown("### 🧬 Micronutrientes")
+
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1:
+    b = st.number_input("Boro (B)", step=0.1)
+with c2:
+    zn = st.number_input("Zinco (Zn)", step=0.1)
+with c3:
+    cu = st.number_input("Cobre (Cu)", step=0.1)
+with c4:
+    mn = st.number_input("Manganês (Mn)", step=0.1)
+with c5:
+    fe = st.number_input("Ferro (Fe)", step=0.1)
+
+st.markdown("### 🌾 Matéria Orgânica")
+mo = st.number_input("Matéria Orgânica (%)", step=0.1)
+
+st.session_state["analise_solo"] = {
+    "pH": ph,
+    "V%": v_percent,
+    "m%": m_percent,
+    "Ca": ca,
+    "Mg": mg,
+    "K": k,
+    "P": p,
+    "S": s,
+    "B": b,
+    "Zn": zn,
+    "Cu": cu,
+    "Mn": mn,
+    "Fe": fe,
+    "MO": mo
+}
+
+# =====================================================
+# 4️⃣ CORREÇÃO DO SOLO
 # =====================================================
 st.header("🧪 Correção do Solo")
 
@@ -51,7 +114,7 @@ with c2:
     gesso = st.number_input("Gesso agrícola (g/planta)", min_value=0.0)
 
 # =====================================================
-# MODALIDADE
+# 5️⃣ MODALIDADE DE APLICAÇÃO
 # =====================================================
 st.header("🚜 Modalidade de Aplicação")
 
@@ -61,7 +124,7 @@ modalidade = st.selectbox(
 )
 
 # =====================================================
-# TABELA EDITÁVEL
+# 6️⃣ TABELA EDITÁVEL – CRONOGRAMA
 # =====================================================
 st.header("📅 Distribuição Anual de Adubação (editável)")
 
@@ -82,7 +145,7 @@ if modalidade == "Fertirrigação":
         "Multicafé Conilon (ml/ha)": [""] * 12,
         "Matéria Orgânica (ml/ha)": [""] * 12,
     }
-else:  # MANUAL
+else:
     dados = {
         "19-04-19 (g/planta)": [""] * 12,
         "20-10-05 (g/planta)": [""] * 12,
@@ -97,7 +160,7 @@ df = pd.DataFrame(dados, index=meses)
 
 st.info(
     "✏️ Edite as doses diretamente na tabela. "
-    "Deixe vazio quando não houver aplicação."
+    "Célula vazia = sem aplicação no mês."
 )
 
 df_editado = st.data_editor(
@@ -107,67 +170,3 @@ df_editado = st.data_editor(
 )
 
 st.session_state["tabela_adubacao"] = df_editado
-# =====================================================
-# ETAPA B – ANÁLISE DE SOLO
-# =====================================================
-st.header("🧪 Análise de Solo")
-
-st.markdown("### 📌 Parâmetros Químicos")
-
-c1, c2, c3 = st.columns(3)
-with c1:
-    ph = st.number_input("pH", step=0.1)
-with c2:
-    v_percent = st.number_input("V% (Saturação por bases)", step=1.0)
-with c3:
-    m_percent = st.number_input("m% (Saturação por alumínio)", step=1.0)
-
-st.markdown("### 🌱 Macronutrientes (cmolc/dm³ ou mg/dm³)")
-
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1:
-    ca = st.number_input("Cálcio (Ca)", step=0.1)
-with c2:
-    mg = st.number_input("Magnésio (Mg)", step=0.1)
-with c3:
-    k = st.number_input("Potássio (K)", step=0.1)
-with c4:
-    p = st.number_input("Fósforo (P)", step=0.1)
-with c5:
-    s = st.number_input("Enxofre (S)", step=0.1)
-
-st.markdown("### 🧬 Micronutrientes (mg/dm³)")
-
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1:
-    b = st.number_input("Boro (B)", step=0.1)
-with c2:
-    zn = st.number_input("Zinco (Zn)", step=0.1)
-with c3:
-    cu = st.number_input("Cobre (Cu)", step=0.1)
-with c4:
-    mn = st.number_input("Manganês (Mn)", step=0.1)
-with c5:
-    fe = st.number_input("Ferro (Fe)", step=0.1)
-
-st.markdown("### 🌾 Matéria Orgânica")
-
-mo = st.number_input("Matéria Orgânica (%)", step=0.1)
-
-# Salvar análise para uso futuro
-st.session_state["analise_solo"] = {
-    "pH": ph,
-    "V%": v_percent,
-    "m%": m_percent,
-    "Ca": ca,
-    "Mg": mg,
-    "K": k,
-    "P": p,
-    "S": s,
-    "B": b,
-    "Zn": zn,
-    "Cu": cu,
-    "Mn": mn,
-    "Fe": fe,
-    "MO": mo
-}
