@@ -38,7 +38,43 @@ with c3:
     variedade = st.text_input("Variedade")
 with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
+# =====================================================
+# 📸 LEITURA DA ANÁLISE POR FOTO / PDF (OCR)
+# =====================================================
+st.header("📸 Importar Análise de Solo (Foto ou PDF)")
 
+arquivo = st.file_uploader(
+    "Envie a análise de solo (imagem ou PDF)",
+    type=["jpg", "jpeg", "png", "pdf"]
+)
+
+texto_extraido = ""
+
+if arquivo is not None:
+    st.info("⏳ Processando arquivo...")
+
+    if arquivo.type == "application/pdf":
+        import pdfplumber
+
+        with pdfplumber.open(arquivo) as pdf:
+            for pagina in pdf.pages:
+                texto_extraido += pagina.extract_text() or ""
+
+    else:
+        from PIL import Image
+        import pytesseract
+
+        imagem = Image.open(arquivo)
+        texto_extraido = pytesseract.image_to_string(imagem, lang="por")
+
+    st.subheader("🧾 Texto extraído da análise")
+    st.text_area(
+        "Confira o texto abaixo:",
+        texto_extraido,
+        height=250
+    )
+
+    st.session_state["texto_analise"] = texto_extraido
 # =====================================================
 # 3️⃣ ETAPA B – ANÁLISE DE SOLO
 # =====================================================
