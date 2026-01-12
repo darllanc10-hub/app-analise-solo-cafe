@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # =====================================================
-# CONFIGURAÇÃO GERAL
+# CONFIGURAÇÃO
 # =====================================================
 st.set_page_config(
     page_title="Análise de Solo – Café",
@@ -16,12 +16,12 @@ st.title("☕ Análise de Solo e Adubação – Café")
 # =====================================================
 st.header("👨‍🌾 Cadastro do Produtor")
 
-col1, col2, col3 = st.columns(3)
-with col1:
+c1, c2, c3 = st.columns(3)
+with c1:
     produtor = st.text_input("Produtor")
-with col2:
+with c2:
     propriedade = st.text_input("Propriedade")
-with col3:
+with c3:
     municipio = st.text_input("Município")
 
 # =====================================================
@@ -29,14 +29,14 @@ with col3:
 # =====================================================
 st.header("🌱 Descrição da Área")
 
-col1, col2, col3, col4 = st.columns(4)
-with col1:
+c1, c2, c3, c4 = st.columns(4)
+with c1:
     area = st.number_input("Área (ha)", min_value=0.0)
-with col2:
+with c2:
     plantas_ha = st.number_input("Plantas por ha", min_value=0)
-with col3:
+with c3:
     variedade = st.text_input("Variedade")
-with col4:
+with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
 
 # =====================================================
@@ -44,10 +44,10 @@ with col4:
 # =====================================================
 st.header("🧪 Correção do Solo")
 
-col1, col2 = st.columns(2)
-with col1:
+c1, c2 = st.columns(2)
+with c1:
     calcario = st.number_input("Calcário (g/planta)", min_value=0.0)
-with col2:
+with c2:
     gesso = st.number_input("Gesso agrícola (g/planta)", min_value=0.0)
 
 # =====================================================
@@ -56,7 +56,7 @@ with col2:
 st.header("🚜 Modalidade de Aplicação")
 
 modalidade = st.selectbox(
-    "Escolha a modalidade principal",
+    "Escolha a modalidade",
     ["Fertirrigação", "Manual"]
 )
 
@@ -70,7 +70,6 @@ meses = [
     "Jul", "Ago", "Set", "Out", "Nov", "Dez"
 ]
 
-# Definição das colunas conforme modalidade
 if modalidade == "Fertirrigação":
     dados = {
         "Ureia 46% (g/planta)": [""] * 12,
@@ -80,22 +79,24 @@ if modalidade == "Fertirrigação":
         "Sulfato de Magnésio (g/planta)": [""] * 12,
         "Boro (ml/ha)": [""] * 12,
         "Zinco (ml/ha)": [""] * 12,
+        "Multicafé Conilon (ml/ha)": [""] * 12,
         "Matéria Orgânica (ml/ha)": [""] * 12,
     }
-else:  # Manual
+else:  # MANUAL
     dados = {
-        "Ureia 46% (g/planta)": [""] * 12,
+        "19-04-19 (g/planta)": [""] * 12,
+        "20-10-05 (g/planta)": [""] * 12,
         "Caltimag (g/planta)": [""] * 12,
         "Boro (ml/ha)": [""] * 12,
         "Zinco (ml/ha)": [""] * 12,
+        "Multicafé Conilon (ml/ha)": [""] * 12,
         "Matéria Orgânica (ml/ha)": [""] * 12,
     }
 
 df = pd.DataFrame(dados, index=meses)
 
 st.info(
-    "✏️ Edite diretamente as doses na tabela. "
-    "Use g/planta ou ml/ha conforme o produto. "
+    "✏️ Edite as doses diretamente na tabela. "
     "Deixe vazio quando não houver aplicação."
 )
 
@@ -105,5 +106,4 @@ df_editado = st.data_editor(
     num_rows="fixed"
 )
 
-# Guarda para próximas etapas (cálculo / PDF)
 st.session_state["tabela_adubacao"] = df_editado
