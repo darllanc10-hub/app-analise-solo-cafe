@@ -102,36 +102,100 @@ adubos = {
     }
 }
 
-# =====================================================
-# 📋 SELEÇÃO E AJUSTE
-# =====================================================
-st.header("📋 Seleção e Ajuste de Adubos")
+st.markdown("### 🧾 Seleção e Ajuste de Adubos")
+
+modalidade_escolhida = st.selectbox(
+    "Modalidade principal de aplicação",
+    ["Manual", "Fertirrigação"]
+)
+
+adubos = {
+    "Ureia 46%": {
+        "grupo": "Nitrogênio",
+        "modalidade": "Fertirrigação",
+        "dose": 10.0,
+        "unidade": "g/planta",
+        "meses": ["Jan", "Fev", "Mar"]
+    },
+    "Nitrato de Cálcio": {
+        "grupo": "Nitrogênio",
+        "modalidade": "Fertirrigação",
+        "dose": 8.0,
+        "unidade": "g/planta",
+        "meses": ["Abr", "Mai"]
+    },
+    "MAP": {
+        "grupo": "Fósforo",
+        "modalidade": "Manual",
+        "dose": 50.0,
+        "unidade": "g/planta",
+        "meses": ["Nov"]
+    },
+    "Cloreto de Potássio": {
+        "grupo": "Potássio",
+        "modalidade": "Manual",
+        "dose": 40.0,
+        "unidade": "g/planta",
+        "meses": ["Dez", "Jan"]
+    }
+}
 
 adubos_ativos = {}
 
 for nome, info in adubos.items():
-    if info["modalidade"] != tipo_aplicacao:
-        continue
+    st.markdown("---")
+    col1, col2, col3 = st.columns([3, 2, 3])
 
-    col1, col2 = st.columns([3, 2])
+    ativo_padrao = info["modalidade"] == modalidade_escolhida
 
     with col1:
-        ativo = st.checkbox(nome, value=True)
+        ativo = st.checkbox(
+            f"{nome} ({info['modalidade']})",
+            value=ativo_padrao,
+            key=f"ativo_{nome}"
+        )
 
     with col2:
-        dose_editada = st.number_input(
+        dose = st.number_input(
             f"Dose ({info['unidade']})",
-            value=float(info["dose"]),
+            min_value=0.0,
+            value=info["dose"],
             step=1.0,
             key=f"dose_{nome}"
         )
 
+    with col3:
+        meses = st.multiselect(
+            "Meses de aplicação",
+            ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+             "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+            default=info["meses"],
+            key=f"meses_{nome}"
+        )
+
     if ativo:
         adubos_ativos[nome] = {
-            "dose": dose_editada,
+            "grupo": info["grupo"],
+            "modalidade": info["modalidade"],
+            "dose": dose,
             "unidade": info["unidade"],
-            "meses": info["meses"]
+            "meses": meses
         }
+
+st.markdown("### 📊 Tabela de Distribuição Anual")
+
+meses_ano = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+             "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
+
+tabela = pd.DataFrame(index=meses_ano)
+
+for nome, info in adubos_ativos.items():
+    tabela[nome] = [
+        f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
+        for mes in meses_ano
+    ]
+
+st.dataframe(tabela, use_container_width=True)
 
 # =====================================================
 # 📅 TABELA ANUAL
