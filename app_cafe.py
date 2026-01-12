@@ -199,8 +199,7 @@ meses = [
     "Boro (ml/ha)": ["", "", "", "", "", "", "", "", "", "", "", ""],
     "Zinco (ml/ha)": ["", "", "", "", "", "", "", "", "", "", "", ""],
     "Matéria Orgânica (ml/ha)": ["", "", "", "", "", "", "", "", "", "", "", ""],
-}
-
+ }
 df = pd.DataFrame(dados, index=meses)
 
 st.info("✏️ Clique nas células para editar as doses (g ou ml). Deixe vazio quando não houver aplicação.")
