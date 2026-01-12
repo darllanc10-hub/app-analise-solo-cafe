@@ -182,35 +182,33 @@ for nome, info in adubos.items():
             "meses": meses
         }
 
-st.markdown("### 📊 Tabela de Distribuição Anual")
+st.markdown("### 📅 Distribuição Anual de Adubação (editável)")
 
-meses_ano = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-             "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
+meses = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+]
 
-tabela = pd.DataFrame(index=meses_ano)
+# Tabela base (valores iniciais)
+dados = {
+    "Ureia 46% (g/planta)": ["", "", "", "", "", "", "", "", "", "", "", ""],
+    "MAP (g/planta)": ["", "", "", "", "", "", "", "", "", "", "", ""],
+    "Cloreto de Potássio (g/planta)": ["", "", "", "", "", "", "", "", "", "", "", ""],
+    "Nitrato de Cálcio (g/planta)": ["", "", "", "", "", "", "", "", "", "", "", ""],
+    "Boro (ml/ha)": ["", "", "", "", "", "", "", "", "", "", "", ""],
+    "Zinco (ml/ha)": ["", "", "", "", "", "", "", "", "", "", "", ""],
+    "Matéria Orgânica (ml/ha)": ["", "", "", "", "", "", "", "", "", "", "", ""],
+}
 
-for nome, info in adubos_ativos.items():
-    tabela[nome] = [
-        f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
-        for mes in meses_ano
-    ]
+df = pd.DataFrame(dados, index=meses)
 
-st.dataframe(tabela, use_container_width=True)
+st.info("✏️ Clique nas células para editar as doses (g ou ml). Deixe vazio quando não houver aplicação.")
 
-# =====================================================
-# 📅 TABELA ANUAL
-# =====================================================
-st.header("📅 Tabela de Distribuição Anual (por planta)")
+df_editado = st.data_editor(
+    df,
+    use_container_width=True,
+    num_rows="fixed"
+)
 
-meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-         "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
-
-tabela = pd.DataFrame(index=meses)
-
-for nome, info in adubos_ativos.items():
-    tabela[nome] = [
-        f"{info['dose']} {info['unidade']}" if mes in info["meses"] else ""
-        for mes in meses
-    ]
-
-st.dataframe(tabela, use_container_width=True)
+# Guardando o resultado para uso futuro
+st.session_state["tabela_adubacao"] = df_editado
