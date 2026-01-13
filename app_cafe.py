@@ -101,7 +101,58 @@ st.session_state["analise_solo"] = {
     "Fe": fe,
     "MO": mo
 }
+# =====================================================
+# 3️⃣ ETAPA C – CÁLCULO AUTOMÁTICO DE CALAGEM E GESSAGEM
+# =====================================================
+st.header("🧮 Cálculo Automático da Correção do Solo")
 
+V_ALVO = 70
+PRNT = 90
+LIMITE_CALCARIO = 3  # t/ha
+
+dose_calcario_t_ha = 0.0
+dose_gesso_t_ha = 0.0
+
+# Cálculo do calcário (somente V%)
+if v_percent < V_ALVO:
+    dose_calcario_t_ha = ((V_ALVO - v_percent) / V_ALVO) * 3
+    dose_calcario_t_ha = min(dose_calcario_t_ha, LIMITE_CALCARIO)
+    dose_calcario_t_ha = dose_calcario_t_ha * (100 / PRNT)
+
+# Regra do gesso
+if v_percent <= 30 or m_percent >= 10:
+    dose_gesso_t_ha = dose_calcario_t_ha * 0.30
+
+# Conversões
+kg_ha_calcario = dose_calcario_t_ha * 1000
+kg_ha_gesso = dose_gesso_t_ha * 1000
+
+g_planta_calcario = 0
+g_planta_gesso = 0
+
+if plantas_ha > 0:
+    g_planta_calcario = (kg_ha_calcario * 1000) / plantas_ha
+    g_planta_gesso = (kg_ha_gesso * 1000) / plantas_ha
+
+# =====================================================
+# RESULTADO
+# =====================================================
+col1, col2 = st.columns(2)
+
+with col1:
+    st.success("🪨 Calcário (automático)")
+    st.write(f"• **{dose_calcario_t_ha:.2f} t/ha**")
+    st.write(f"• **{kg_ha_calcario:.0f} kg/ha**")
+    st.write(f"• **{g_planta_calcario:.0f} g por planta**")
+
+with col2:
+    st.warning("🌫️ Gesso Agrícola (automático)")
+    if dose_gesso_t_ha > 0:
+        st.write(f"• **{dose_gesso_t_ha:.2f} t/ha**")
+        st.write(f"• **{kg_ha_gesso:.0f} kg/ha**")
+        st.write(f"• **{g_planta_gesso:.0f} g por planta**")
+    else:
+        st.write("• Não recomendado para esta análise")
 # =====================================================
 # 4️⃣ CORREÇÃO DO SOLO
 # =====================================================
