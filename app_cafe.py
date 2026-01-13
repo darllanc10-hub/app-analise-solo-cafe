@@ -102,6 +102,20 @@ st.session_state["analise_solo"] = {
     "MO": mo
 }
 # =====================================================
+# CONVERSÃO – SUPER S (L/ha → ml/planta)
+# =====================================================
+st.subheader("🧪 Enxofre (Super S)")
+
+super_s_l_ha = 5  # dose fixa que você utiliza
+
+if plantas_ha > 0:
+    super_s_ml_planta = (super_s_l_ha * 1000) / plantas_ha
+else:
+    super_s_ml_planta = 0
+
+st.write(f"➡ **Super S:** {super_s_l_ha} L/ha")
+st.write(f"➡ **{super_s_ml_planta:.2f} ml por planta**")
+# =====================================================
 # 3️⃣ ETAPA C – CÁLCULO AUTOMÁTICO DE CALAGEM E GESSAGEM
 # =====================================================
 st.header("🧮 Cálculo Automático da Correção do Solo")
