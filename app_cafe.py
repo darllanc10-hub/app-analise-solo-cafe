@@ -44,8 +44,6 @@ with c4:
 # =====================================================
 st.header("🧪 Análise de Solo")
 
-st.markdown("### 📌 Parâmetros Químicos")
-
 c1, c2, c3 = st.columns(3)
 with c1:
     ph = st.number_input("pH", step=0.1)
@@ -53,8 +51,6 @@ with c2:
     v_percent = st.number_input("V% (Saturação por bases)", step=1.0)
 with c3:
     m_percent = st.number_input("m% (Saturação por alumínio)", step=1.0)
-
-st.markdown("### 🌱 Macronutrientes")
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
@@ -66,25 +62,10 @@ with c3:
 with c4:
     p = st.number_input("Fósforo (P)", step=0.1)
 
-st.markdown("### 🧬 Micronutrientes")
-
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1:
-    b = st.number_input("Boro (B)", step=0.1)
-with c2:
-    zn = st.number_input("Zinco (Zn)", step=0.1)
-with c3:
-    cu = st.number_input("Cobre (Cu)", step=0.1)
-with c4:
-    mn = st.number_input("Manganês (Mn)", step=0.1)
-with c5:
-    fe = st.number_input("Ferro (Fe)", step=0.1)
-
-st.markdown("### 🌾 Matéria Orgânica")
 mo = st.number_input("Matéria Orgânica (%)", step=0.1)
 
 # =====================================================
-# 4️⃣ CORREÇÃO DO SOLO (pH e Base)
+# 4️⃣ CORREÇÃO DO SOLO (INPUT)
 # =====================================================
 st.header("🧪 Correção do Solo")
 
@@ -95,22 +76,18 @@ with c2:
     gesso = st.number_input("Gesso agrícola (g/planta)", min_value=0.0)
 
 # =====================================================
-# 5️⃣ ENXOFRE – SOMENTE SUPER S (LÍQUIDO)
+# 5️⃣ ENXOFRE – SUPER S
 # =====================================================
 st.header("🧪 Enxofre (Super S)")
 
-super_s_l_ha = 5  # dose fixa utilizada
-
-if plantas_ha > 0:
-    super_s_ml_planta = (super_s_l_ha * 1000) / plantas_ha
-else:
-    super_s_ml_planta = 0
+super_s_l_ha = 5
+super_s_ml_planta = (super_s_l_ha * 1000) / plantas_ha if plantas_ha > 0 else 0
 
 st.write(f"➡ **Super S:** {super_s_l_ha} L/ha")
 st.write(f"➡ **{super_s_ml_planta:.2f} ml por planta**")
 
 # =====================================================
-# 6️⃣ MODALIDADE DE APLICAÇÃO
+# 6️⃣ MODALIDADE
 # =====================================================
 st.header("🚜 Modalidade de Aplicação")
 
@@ -120,14 +97,22 @@ modalidade = st.selectbox(
 )
 
 # =====================================================
-# 7️⃣ TABELA EDITÁVEL – CRONOGRAMA
+# 7️⃣ DOSES INTERNAS – MANUAL (g/planta)
+# =====================================================
+dose_190419 = 100
+dose_201005 = 100
+dose_caltimag = 100
+
+meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
+
+manual_190419 = [0, dose_190419, 0, dose_190419, 0, 0, 0, 0, 0, dose_190419, 0, dose_190419]
+manual_201005 = [dose_201005, 0, dose_201005, 0, dose_201005, 0, dose_201005, 0, dose_201005, 0, dose_201005, 0]
+manual_caltimag = [dose_caltimag, 0, 0, 0, 0, 0, dose_caltimag, 0, 0, 0, 0, 0]
+
+# =====================================================
+# 8️⃣ TABELA FINAL – EDITÁVEL
 # =====================================================
 st.header("📅 Distribuição Anual de Adubação (editável)")
-
-meses = [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-]
 
 if modalidade == "Fertirrigação":
     dados = {
@@ -143,9 +128,9 @@ if modalidade == "Fertirrigação":
     }
 else:
     dados = {
-        "19-04-19 (g/planta)": [""] * 12,
-        "20-10-05 (g/planta)": [""] * 12,
-        "Caltimag (g/planta)": [""] * 12,
+        "19-04-19 (g/planta)": manual_190419,
+        "20-10-05 (g/planta)": manual_201005,
+        "Caltimag (g/planta)": manual_caltimag,
         "Boro (ml/ha)": [""] * 12,
         "Zinco (ml/ha)": [""] * 12,
         "Multicafé Conilon (ml/ha)": [""] * 12,
@@ -154,10 +139,6 @@ else:
 
 df = pd.DataFrame(dados, index=meses)
 
-st.info("✏️ Edite as doses diretamente na tabela. Célula vazia = sem aplicação.")
+st.info("✏️ A tabela já vem preenchida e pode ser editada livremente.")
 
-df_editado = st.data_editor(
-    df,
-    use_container_width=True,
-    num_rows="fixed"
-)
+st.data_editor(df, use_container_width=True, num_rows="fixed")
