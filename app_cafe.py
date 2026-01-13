@@ -40,7 +40,7 @@ with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
 
 # =====================================================
-# 3️⃣ ETAPA B – ANÁLISE DE SOLO
+# 3️⃣ ANÁLISE DE SOLO
 # =====================================================
 st.header("🧪 Análise de Solo")
 
@@ -56,7 +56,7 @@ with c3:
 
 st.markdown("### 🌱 Macronutrientes")
 
-c1, c2, c3, c4, c5 = st.columns(5)
+c1, c2, c3, c4 = st.columns(4)
 with c1:
     ca = st.number_input("Cálcio (Ca)", step=0.1)
 with c2:
@@ -65,8 +65,6 @@ with c3:
     k = st.number_input("Potássio (K)", step=0.1)
 with c4:
     p = st.number_input("Fósforo (P)", step=0.1)
-with c5:
-    s = st.number_input("Enxofre (S)", step=0.1)
 
 st.markdown("### 🧬 Micronutrientes")
 
@@ -85,156 +83,8 @@ with c5:
 st.markdown("### 🌾 Matéria Orgânica")
 mo = st.number_input("Matéria Orgânica (%)", step=0.1)
 
-st.session_state["analise_solo"] = {
-    "pH": ph,
-    "V%": v_percent,
-    "m%": m_percent,
-    "Ca": ca,
-    "Mg": mg,
-    "K": k,
-    "P": p,
-    "S": s,
-    "B": b,
-    "Zn": zn,
-    "Cu": cu,
-    "Mn": mn,
-    "Fe": fe,
-    "MO": mo
-}
 # =====================================================
-# CONVERSÃO – SUPER S (L/ha → ml/planta)
-# =====================================================
-st.subheader("🧪 Enxofre (Super S)")
-
-super_s_l_ha = 5  # dose fixa que você utiliza
-
-if plantas_ha > 0:
-    super_s_ml_planta = (super_s_l_ha * 1000) / plantas_ha
-else:
-    super_s_ml_planta = 0
-
-st.write(f"➡ **Super S:** {super_s_l_ha} L/ha")
-st.write(f"➡ **{super_s_ml_planta:.2f} ml por planta**")
-# =====================================================
-# 3️⃣ ETAPA C – CÁLCULO AUTOMÁTICO DE CALAGEM E GESSAGEM
-# =====================================================
-st.header("🧮 Cálculo Automático da Correção do Solo")
-
-V_ALVO = 70
-PRNT = 90
-LIMITE_CALCARIO = 3  # t/ha
-
-dose_calcario_t_ha = 0.0
-dose_gesso_t_ha = 0.0
-
-# Cálculo do calcário (somente V%)
-if v_percent < V_ALVO:
-    dose_calcario_t_ha = ((V_ALVO - v_percent) / V_ALVO) * 3
-    dose_calcario_t_ha = min(dose_calcario_t_ha, LIMITE_CALCARIO)
-    dose_calcario_t_ha = dose_calcario_t_ha * (100 / PRNT)
-
-# Regra do gesso
-if v_percent <= 30 or m_percent >= 10:
-    dose_gesso_t_ha = dose_calcario_t_ha * 0.30
-
-# Conversões
-kg_ha_calcario = dose_calcario_t_ha * 1000
-kg_ha_gesso = dose_gesso_t_ha * 1000
-
-g_planta_calcario = 0
-g_planta_gesso = 0
-
-if plantas_ha > 0:
-    g_planta_calcario = (kg_ha_calcario * 1000) / plantas_ha
-    g_planta_gesso = (kg_ha_gesso * 1000) / plantas_ha
-
-# =====================================================
-# RESULTADO
-# =====================================================
-col1, col2 = st.columns(2)
-
-with col1:
-    st.success("🪨 Calcário (automático)")
-    st.write(f"• **{dose_calcario_t_ha:.2f} t/ha**")
-    st.write(f"• **{kg_ha_calcario:.0f} kg/ha**")
-    st.write(f"• **{g_planta_calcario:.0f} g por planta**")
-
-with col2:
-    st.warning("🌫️ Gesso Agrícola (automático)")
-    if dose_gesso_t_ha > 0:
-        st.write(f"• **{dose_gesso_t_ha:.2f} t/ha**")
-        st.write(f"• **{kg_ha_gesso:.0f} kg/ha**")
-        st.write(f"• **{g_planta_gesso:.0f} g por planta**")
-    else:
-        st.write("• Não recomendado para esta análise")
- # =====================================================
-# 3️⃣ ETAPA D – CORREÇÃO NUTRICIONAL (ANUAL)
-# =====================================================
-st.header("🌿 Correção Nutricional – Dose Anual")
-
-# Alvos técnicos (editáveis futuramente)
-ALVO_N = 200
-ALVO_P = 120
-ALVO_K = 180
-
-ALVO_CA = 60
-ALVO_MG = 15
-ALVO_S = 20
-
-ALVO_B = 0.5
-ALVO_ZN = 2
-ALVO_CU = 1
-ALVO_MN = 5
-
-ALVO_MO = 3.0
-
-# Diferenças
-deficit_n = max(ALVO_N - k, 0)
-deficit_p = max(ALVO_P - p, 0)
-deficit_k = max(ALVO_K - k, 0)
-
-deficit_ca = max(ALVO_CA - ca, 0)
-deficit_mg = max(ALVO_MG - mg, 0)
-deficit_s = max(ALVO_S - s, 0)
-
-deficit_b = max(ALVO_B - b, 0)
-deficit_zn = max(ALVO_ZN - zn, 0)
-deficit_cu = max(ALVO_CU - cu, 0)
-deficit_mn = max(ALVO_MN - mn, 0)
-
-deficit_mo = max(ALVO_MO - mo, 0)
-
-# Conversão para g/planta ou ml/ha (simplificado)
-def g_planta(valor_kg_ha):
-    if plantas_ha > 0:
-        return (valor_kg_ha * 1000) / plantas_ha
-    return 0
-
-st.subheader("📊 Resultado por planta")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.success("Macronutrientes")
-    st.write(f"N: **{g_planta(deficit_n):.1f} g/planta**")
-    st.write(f"P₂O₅: **{g_planta(deficit_p):.1f} g/planta**")
-    st.write(f"K₂O: **{g_planta(deficit_k):.1f} g/planta**")
-
-with col2:
-    st.info("Ca • Mg • S")
-    st.write(f"Cálcio: **{g_planta(deficit_ca):.1f} g/planta**")
-    st.write(f"Magnésio: **{g_planta(deficit_mg):.1f} g/planta**")
-    st.write(f"Enxofre: **{g_planta(deficit_s):.1f} g/planta**")
-
-with col3:
-    st.warning("Micronutrientes / MO")
-    st.write(f"Boro: **{deficit_b:.2f} kg/ha**")
-    st.write(f"Zinco: **{deficit_zn:.2f} kg/ha**")
-    st.write(f"Cobre: **{deficit_cu:.2f} kg/ha**")
-    st.write(f"Manganês: **{deficit_mn:.2f} kg/ha**")
-    st.write(f"Matéria Orgânica: **{deficit_mo:.2f}%**")       
-# =====================================================
-# 4️⃣ CORREÇÃO DO SOLO
+# 4️⃣ CORREÇÃO DO SOLO (pH e Base)
 # =====================================================
 st.header("🧪 Correção do Solo")
 
@@ -245,7 +95,22 @@ with c2:
     gesso = st.number_input("Gesso agrícola (g/planta)", min_value=0.0)
 
 # =====================================================
-# 5️⃣ MODALIDADE DE APLICAÇÃO
+# 5️⃣ ENXOFRE – SOMENTE SUPER S (LÍQUIDO)
+# =====================================================
+st.header("🧪 Enxofre (Super S)")
+
+super_s_l_ha = 5  # dose fixa utilizada
+
+if plantas_ha > 0:
+    super_s_ml_planta = (super_s_l_ha * 1000) / plantas_ha
+else:
+    super_s_ml_planta = 0
+
+st.write(f"➡ **Super S:** {super_s_l_ha} L/ha")
+st.write(f"➡ **{super_s_ml_planta:.2f} ml por planta**")
+
+# =====================================================
+# 6️⃣ MODALIDADE DE APLICAÇÃO
 # =====================================================
 st.header("🚜 Modalidade de Aplicação")
 
@@ -255,7 +120,7 @@ modalidade = st.selectbox(
 )
 
 # =====================================================
-# 6️⃣ TABELA EDITÁVEL – CRONOGRAMA
+# 7️⃣ TABELA EDITÁVEL – CRONOGRAMA
 # =====================================================
 st.header("📅 Distribuição Anual de Adubação (editável)")
 
@@ -289,15 +154,10 @@ else:
 
 df = pd.DataFrame(dados, index=meses)
 
-st.info(
-    "✏️ Edite as doses diretamente na tabela. "
-    "Célula vazia = sem aplicação no mês."
-)
+st.info("✏️ Edite as doses diretamente na tabela. Célula vazia = sem aplicação.")
 
 df_editado = st.data_editor(
     df,
     use_container_width=True,
     num_rows="fixed"
 )
-
-st.session_state["tabela_adubacao"] = df_editado
