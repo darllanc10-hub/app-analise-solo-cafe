@@ -74,7 +74,43 @@ with c1:
     calcario = st.number_input("Calcário (g/planta)", min_value=0.0)
 with c2:
     gesso = st.number_input("Gesso agrícola (g/planta)", min_value=0.0)
+# =====================================================
+# RESULTADO – CALCÁRIO E GESSO (AUTOMÁTICO)
+# =====================================================
+st.subheader("📊 Resultado da Correção do Solo")
 
+# Parâmetros técnicos
+V_alvo = 70
+PRNT = 0.90
+limite_calcario_t_ha = 3
+
+# Cálculo do calcário (t/ha)
+if v_percent < V_alvo:
+    calcario_t_ha = ((V_alvo - v_percent) / V_alvo) * limite_calcario_t_ha
+    calcario_t_ha = min(calcario_t_ha, limite_calcario_t_ha)
+else:
+    calcario_t_ha = 0
+
+# Conversão para g/planta
+calcario_g_planta_calc = (
+    (calcario_t_ha * 1000 * 1000) / plantas_ha
+    if plantas_ha > 0 else 0
+)
+
+# Gesso: 30% do calcário, com regra técnica
+if v_percent <= 30 or m_percent >= 10:
+    gesso_t_ha = calcario_t_ha * 0.30
+else:
+    gesso_t_ha = 0
+
+gesso_g_planta_calc = (
+    (gesso_t_ha * 1000 * 1000) / plantas_ha
+    if plantas_ha > 0 else 0
+)
+
+# Exibição
+st.write(f"🪨 **Calcário:** {calcario_g_planta_calc:.0f} g por planta")
+st.write(f"🧱 **Gesso agrícola:** {gesso_g_planta_calc:.0f} g por planta")
 # =====================================================
 # 5️⃣ ENXOFRE – SUPER S
 # =====================================================
