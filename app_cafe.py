@@ -102,7 +102,66 @@ st.info(
     "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%.\n"
     "📌 Parcelamento indica divisão da DOSE TOTAL anual, não reaplicação."
 )
+# =====================================================
+# NPK – ETAPA A | NECESSIDADE ANUAL (5ª APROXIMAÇÃO)
+# =====================================================
+st.header("📊 NPK – Necessidade Anual (5ª Aproximação)")
 
+# Produtividade
+produtividade = st.selectbox(
+    "Produtividade esperada (sc/ha)",
+    options=list(range(10, 221, 10))
+)
+
+st.caption("Baseado na Tabela da 5ª Aproximação para café.")
+
+# -------------------------------
+# TABELA BASE (MODELO)
+# Obs: valores exemplo – depois ajustamos exatamente à sua tabela
+# -------------------------------
+tabela_5_aprox = {
+    10:  {"N": 60,  "P2O5": 20,  "K2O": 60},
+    20:  {"N": 90,  "P2O5": 30,  "K2O": 90},
+    30:  {"N": 120, "P2O5": 40,  "K2O": 120},
+    40:  {"N": 150, "P2O5": 50,  "K2O": 150},
+    50:  {"N": 180, "P2O5": 60,  "K2O": 180},
+    60:  {"N": 210, "P2O5": 70,  "K2O": 210},
+    80:  {"N": 260, "P2O5": 90,  "K2O": 260},
+    100: {"N": 300, "P2O5": 110, "K2O": 300},
+    120: {"N": 340, "P2O5": 130, "K2O": 340},
+    150: {"N": 400, "P2O5": 160, "K2O": 400},
+    180: {"N": 460, "P2O5": 190, "K2O": 460},
+    200: {"N": 500, "P2O5": 210, "K2O": 500},
+    220: {"N": 540, "P2O5": 230, "K2O": 540},
+}
+
+# Buscar necessidade
+necessidade = tabela_5_aprox.get(produtividade)
+
+if necessidade:
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.metric("Nitrogênio (N)", f"{necessidade['N']} kg/ha/ano")
+    with c2:
+        st.metric("Fósforo (P₂O₅)", f"{necessidade['P2O5']} kg/ha/ano")
+    with c3:
+        st.metric("Potássio (K₂O)", f"{necessidade['K2O']} kg/ha/ano")
+
+    st.info(
+        "📌 Estes valores representam a NECESSIDADE ANUAL.\n"
+        "📌 A conversão para produto (g ou ml por planta) será feita na próxima etapa."
+    )
+
+    # Guardar no session_state para próximas etapas
+    st.session_state["necessidade_npk"] = {
+        "produtividade": produtividade,
+        "N": necessidade["N"],
+        "P2O5": necessidade["P2O5"],
+        "K2O": necessidade["K2O"]
+    }
+else:
+    st.warning("Produtividade não encontrada na tabela.")
 # =====================================================
 # TABELA (ETAPA SEGUINTE)
 # =====================================================
