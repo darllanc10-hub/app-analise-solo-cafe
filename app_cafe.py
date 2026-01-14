@@ -81,7 +81,27 @@ if plantas_ha > 0:
         )
     else:
         st.success(f"🧂 Gesso: {gesso_g_planta:.0f} g/planta")
+st.markdown("### 🧬 Micronutrientes (análise de solo)")
 
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1:
+    b = st.number_input("Boro (B) – mg/dm³", step=0.1)
+with c2:
+    zn = st.number_input("Zinco (Zn) – mg/dm³", step=0.1)
+with c3:
+    cu = st.number_input("Cobre (Cu) – mg/dm³", step=0.1)
+with c4:
+    mn = st.number_input("Manganês (Mn) – mg/dm³", step=0.1)
+with c5:
+    fe = st.number_input("Ferro (Fe) – mg/dm³", step=0.1)
+
+st.session_state["micros_analise"] = {
+    "B": b,
+    "Zn": zn,
+    "Cu": cu,
+    "Mn": mn,
+    "Fe": fe
+}
 # =====================================================
 # NPK – 5ª APROXIMAÇÃO (BASE)
 # =====================================================
@@ -111,27 +131,7 @@ if plantas_ha > 0:
     st.success(f"🌿 Nitrogênio (Ureia): {n_g:.1f} g/planta/ano")
     st.success(f"🌱 Fósforo (MAP): {p_g:.1f} g/planta/ano")
     st.success(f"🍃 Potássio (KCl): {k_g:.1f} g/planta/ano")
-st.markdown("### 🧬 Micronutrientes (análise de solo)")
 
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1:
-    b = st.number_input("Boro (B) – mg/dm³", step=0.1)
-with c2:
-    zn = st.number_input("Zinco (Zn) – mg/dm³", step=0.1)
-with c3:
-    cu = st.number_input("Cobre (Cu) – mg/dm³", step=0.1)
-with c4:
-    mn = st.number_input("Manganês (Mn) – mg/dm³", step=0.1)
-with c5:
-    fe = st.number_input("Ferro (Fe) – mg/dm³", step=0.1)
-
-st.session_state["micros_analise"] = {
-    "B": b,
-    "Zn": zn,
-    "Cu": cu,
-    "Mn": mn,
-    "Fe": fe
-}
 # =====================================================
 # TABELA FINAL
 # =====================================================
