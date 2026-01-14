@@ -1,10 +1,15 @@
 import streamlit as st
+import pandas as pd
 
 # =====================================================
-# CONFIGURAÇÃO
+# CONFIGURAÇÃO GERAL
 # =====================================================
-st.set_page_config(page_title="Correção de Solo – Café", layout="wide")
-st.title("☕ Correção de Solo – Café")
+st.set_page_config(
+    page_title="Análise de Solo – Café",
+    layout="wide"
+)
+
+st.title("☕ Análise de Solo e Adubação – Café")
 
 # =====================================================
 # 1️⃣ CADASTRO DO PRODUTOR
@@ -24,12 +29,14 @@ with c3:
 # =====================================================
 st.header("🌱 Descrição da Área")
 
-c1, c2, c3 = st.columns(3)
+c1, c2, c3, c4 = st.columns(4)
 with c1:
     area = st.number_input("Área (ha)", min_value=0.0)
 with c2:
-    variedade = st.text_input("Variedade")
+    plantas_ha = st.number_input("Plantas por ha", min_value=0)
 with c3:
+    variedade = st.text_input("Variedade")
+with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
 
 # =====================================================
@@ -37,74 +44,135 @@ with c3:
 # =====================================================
 st.header("🧪 Análise de Solo")
 
+st.markdown("### 📌 Parâmetros Químicos")
+
 c1, c2, c3 = st.columns(3)
 with c1:
-    v_percent = st.number_input(
-        "V% (Saturação por bases)",
-        min_value=0.0,
-        max_value=100.0,
-        step=1.0
-    )
-    with c3:
-    m_percent = st.number_input(
-        "m% (Saturação por Alumínio)",
-        min_value=0.0,
-        max_value=100.0,
-        step=1.0
-    )
+    ph = st.number_input("pH", step=0.1)
 with c2:
-    m_percent = st.number_input(
-        "m% (Saturação por Alumínio)",
-        min_value=0.0,
-        max_value=100.0,
-        step=1.0
-    )
+    v_percent = st.number_input("V% (Saturação por bases)", step=1.0)
 with c3:
-    T = st.number_input(
-        "CTC a pH 7,0 (T) – cmolc/dm³",
+    m_percent = st.number_input(
+        "m% (Saturação por Alumínio)",
         min_value=0.0,
-        step=0.1
+        max_value=100.0,
+        step=1.0
     )
 
-# =====================================================
-# 4️⃣ CÁLCULO DE CALCÁRIO E GESSO
-# =====================================================
-st.header("🧮 Resultado da Correção")
+st.markdown("### 🌱 Macronutrientes")
 
-calcario_g_planta = 0.0
-gesso_g_planta = 0.0
-
-if T > 0 and v_percent < 70:
-    calcario_g_planta = ((70 - v_percent) * T / 90 / 10000) * 1000 * 2
-
-    # Gesso: 30% do calcário
-    if m_percent >= 10 or v_percent <= 30:
-        gesso_g_planta = calcario_g_planta * 0.30
-
-# =====================================================
-# 5️⃣ APRESENTAÇÃO DOS RESULTADOS
-# =====================================================
-c1, c2 = st.columns(2)
-
+c1, c2, c3, c4, c5 = st.columns(5)
 with c1:
-    st.metric(
-        label="Calcário recomendado",
-        value=f"{calcario_g_planta:.0f} g/planta"
-    )
-
+    ca = st.number_input("Cálcio (Ca)", step=0.1)
 with c2:
-    if gesso_g_planta > 0:
-        st.metric(
-            label="Gesso agrícola recomendado",
-            value=f"{gesso_g_planta:.0f} g/planta"
-        )
-    else:
-        st.metric(
-            label="Gesso agrícola",
-            value="Não recomendado"
-        )
+    mg = st.number_input("Magnésio (Mg)", step=0.1)
+with c3:
+    k = st.number_input("Potássio (K)", step=0.1)
+with c4:
+    p = st.number_input("Fósforo (P)", step=0.1)
+with c5:
+    s = st.number_input("Enxofre (S)", step=0.1)
+
+st.markdown("### 🧬 Micronutrientes")
+
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1:
+    b = st.number_input("Boro (B)", step=0.1)
+with c2:
+    zn = st.number_input("Zinco (Zn)", step=0.1)
+with c3:
+    cu = st.number_input("Cobre (Cu)", step=0.1)
+with c4:
+    mn = st.number_input("Manganês (Mn)", step=0.1)
+with c5:
+    fe = st.number_input("Ferro (Fe)", step=0.1)
+
+st.markdown("### 🌾 Matéria Orgânica")
+mo = st.number_input("Matéria Orgânica (%)", step=0.1)
+
+# Guarda análise (como já estava)
+st.session_state["analise_solo"] = {
+    "pH": ph,
+    "V%": v_percent,
+    "m%": m_percent,
+    "Ca": ca,
+    "Mg": mg,
+    "K": k,
+    "P": p,
+    "S": s,
+    "B": b,
+    "Zn": zn,
+    "Cu": cu,
+    "Mn": mn,
+    "Fe": fe,
+    "MO": mo
+}
+
+# =====================================================
+# 4️⃣ CORREÇÃO DO SOLO (manual por enquanto)
+# =====================================================
+st.header("🧪 Correção do Solo")
+
+c1, c2 = st.columns(2)
+with c1:
+    calcario = st.number_input("Calcário (g/planta)", min_value=0.0)
+with c2:
+    gesso = st.number_input("Gesso agrícola (g/planta)", min_value=0.0)
+
+# =====================================================
+# 5️⃣ MODALIDADE DE APLICAÇÃO
+# =====================================================
+st.header("🚜 Modalidade de Aplicação")
+
+modalidade = st.selectbox(
+    "Escolha a modalidade",
+    ["Fertirrigação", "Manual"]
+)
+
+# =====================================================
+# 6️⃣ TABELA EDITÁVEL – CRONOGRAMA
+# =====================================================
+st.header("📅 Distribuição Anual de Adubação (editável)")
+
+meses = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+]
+
+if modalidade == "Fertirrigação":
+    dados = {
+        "Ureia 46% (g/planta)": [""] * 12,
+        "MAP (g/planta)": [""] * 12,
+        "Cloreto de Potássio (g/planta)": [""] * 12,
+        "Nitrato de Cálcio (g/planta)": [""] * 12,
+        "Sulfato de Magnésio (g/planta)": [""] * 12,
+        "Boro (ml/ha)": [""] * 12,
+        "Zinco (ml/ha)": [""] * 12,
+        "Multicafé Conilon (ml/ha)": [""] * 12,
+        "Matéria Orgânica (ml/ha)": [""] * 12,
+    }
+else:
+    dados = {
+        "19-04-19 (g/planta)": [""] * 12,
+        "20-10-05 (g/planta)": [""] * 12,
+        "Caltimag (g/planta)": [""] * 12,
+        "Boro (ml/ha)": [""] * 12,
+        "Zinco (ml/ha)": [""] * 12,
+        "Multicafé Conilon (ml/ha)": [""] * 12,
+        "Matéria Orgânica (ml/ha)": [""] * 12,
+    }
+
+df = pd.DataFrame(dados, index=meses)
 
 st.info(
-    "📌 O cálculo do calcário considera V alvo = 70%, PRNT = 90.\n"
-    "📌 O gesso é recomendado quando m ≥ 10% ou V ≤ 30%, na dose de 30% do calcário."
+    "✏️ Edite as doses diretamente na tabela. "
+    "Célula vazia = sem aplicação no mês."
 )
+
+df_editado = st.data_editor(
+    df,
+    use_container_width=True,
+    num_rows="fixed"
+)
+
+st.session_state["tabela_adubacao"] = df_editado
