@@ -45,6 +45,13 @@ with c1:
         max_value=100.0,
         step=1.0
     )
+    with c3:
+    m_percent = st.number_input(
+        "m% (Saturação por Alumínio)",
+        min_value=0.0,
+        max_value=100.0,
+        step=1.0
+    )
 with c2:
     m_percent = st.number_input(
         "m% (Saturação por Alumínio)",
