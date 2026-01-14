@@ -4,147 +4,177 @@ import pandas as pd
 # =====================================================
 # CONFIGURAÇÃO GERAL
 # =====================================================
-st.set_page_config(page_title="Análise de Solo – Café", layout="wide")
+st.set_page_config(
+    page_title="Análise de Solo – Café",
+    layout="wide"
+)
+
 st.title("☕ Análise de Solo e Adubação – Café")
 
 # =====================================================
-# CADASTRO DO PRODUTOR
+# 1️⃣ CADASTRO DO PRODUTOR
 # =====================================================
 st.header("👨‍🌾 Cadastro do Produtor")
+
 c1, c2, c3 = st.columns(3)
-produtor = c1.text_input("Produtor")
-propriedade = c2.text_input("Propriedade")
-municipio = c3.text_input("Município")
+with c1:
+    produtor = st.text_input("Produtor")
+with c2:
+    propriedade = st.text_input("Propriedade")
+with c3:
+    municipio = st.text_input("Município")
 
 # =====================================================
-# DESCRIÇÃO DA ÁREA
+# 2️⃣ DESCRIÇÃO DA ÁREA
 # =====================================================
 st.header("🌱 Descrição da Área")
+
 c1, c2, c3, c4 = st.columns(4)
-area = c1.number_input("Área (ha)", min_value=0.0)
-plantas_ha = c2.number_input("Plantas por ha", min_value=0)
-variedade = c3.text_input("Variedade")
-idade = c4.number_input("Idade da lavoura (anos)", min_value=0)
+with c1:
+    area = st.number_input("Área (ha)", min_value=0.0)
+with c2:
+    plantas_ha = st.number_input("Plantas por ha", min_value=1)
+with c3:
+    variedade = st.text_input("Variedade")
+with c4:
+    idade = st.number_input("Idade da lavoura (anos)", min_value=0)
 
 # =====================================================
-# PRODUTIVIDADE
-# =====================================================
-st.header("📦 Produtividade Esperada")
-sc_ha = st.selectbox(
-    "Sacas por hectare (SC/ha)",
-    options=list(range(10, 230, 10))
-)
-
-# =====================================================
-# ANÁLISE DE SOLO
+# 3️⃣ ETAPA B – ANÁLISE DE SOLO
 # =====================================================
 st.header("🧪 Análise de Solo")
 
-c1, c2, c3 = st.columns(3)
-ph = c1.number_input("pH", step=0.1)
-v_percent = c2.number_input("V%", step=1.0)
-m_percent = c3.number_input("m%", step=1.0)
+st.markdown("### 📌 Parâmetros Químicos")
 
-c1, c2, c3, c4, c5 = st.columns(5)
-ca = c1.number_input("Ca", step=0.1)
-mg = c2.number_input("Mg", step=0.1)
-k = c3.number_input("K", step=0.1)
-p = c4.number_input("P", step=0.1)
-s = c5.number_input("S", step=0.1)
+c1, c2, c3, c4 = st.columns(4)
+with c1:
+    ph = st.number_input("pH", step=0.1)
+with c2:
+    v_percent = st.number_input("V% (Saturação por bases)", step=1.0)
+with c3:
+    m_percent = st.number_input("m% (Saturação por alumínio)", step=1.0)
+with c4:
+    T = st.number_input("CTC (T) cmolc/dm³", step=0.1)
 
-mo = st.number_input("Matéria Orgânica (%)", step=0.1)
-
-# =====================================================
-# CORREÇÃO DO SOLO
-# =====================================================
-st.header("🧪 Correção do Solo")
-
-if plantas_ha > 0:
-    calcario_t_ha = 3 if v_percent < 60 else 0
-    gesso_t_ha = 0.9 if ca < 4 else 0
-
-    calc_g_planta = (calcario_t_ha * 1_000_000) / plantas_ha
-    gesso_g_planta = (gesso_t_ha * 1_000_000) / plantas_ha
-
-    if calc_g_planta > 300:
-        st.success(
-            f"🪨 Calcário: {calc_g_planta:.0f} g/planta/ano "
-            f"(aplicar em 2x de {calc_g_planta/2:.0f} g)"
-        )
-    else:
-        st.success(f"🪨 Calcário: {calc_g_planta:.0f} g/planta")
-
-    if gesso_g_planta > 200:
-        st.success(
-            f"🧂 Gesso: {gesso_g_planta:.0f} g/planta/ano "
-            f"(aplicar em 2x de {gesso_g_planta/2:.0f} g)"
-        )
-    else:
-        st.success(f"🧂 Gesso: {gesso_g_planta:.0f} g/planta")
-st.markdown("### 🧬 Micronutrientes (análise de solo)")
+st.markdown("### 🌱 Macronutrientes")
 
 c1, c2, c3, c4, c5 = st.columns(5)
 with c1:
-    b = st.number_input("Boro (B) – mg/dm³", step=0.1)
+    ca = st.number_input("Cálcio (Ca)", step=0.1)
 with c2:
-    zn = st.number_input("Zinco (Zn) – mg/dm³", step=0.1)
+    mg = st.number_input("Magnésio (Mg)", step=0.1)
 with c3:
-    cu = st.number_input("Cobre (Cu) – mg/dm³", step=0.1)
+    k = st.number_input("Potássio (K)", step=0.1)
 with c4:
-    mn = st.number_input("Manganês (Mn) – mg/dm³", step=0.1)
+    p = st.number_input("Fósforo (P)", step=0.1)
 with c5:
-    fe = st.number_input("Ferro (Fe) – mg/dm³", step=0.1)
+    s = st.number_input("Enxofre (S)", step=0.1)
 
-st.session_state["micros_analise"] = {
-    "B": b,
-    "Zn": zn,
-    "Cu": cu,
-    "Mn": mn,
-    "Fe": fe
-}
-# =====================================================
-# NPK – 5ª APROXIMAÇÃO (BASE)
-# =====================================================
-st.header("🧮 Correção Automática de NPK")
+st.markdown("### 🧬 Micronutrientes")
 
-# Necessidade base (AJUSTÁVEL)
-necessidade_npk = {
-    "N": sc_ha * 3.2,
-    "P2O5": sc_ha * 1.2,
-    "K2O": sc_ha * 3.5
-}
+c1, c2, c3, c4, c5 = st.columns(5)
+with c1:
+    b = st.number_input("Boro (B)", step=0.1)
+with c2:
+    zn = st.number_input("Zinco (Zn)", step=0.1)
+with c3:
+    cu = st.number_input("Cobre (Cu)", step=0.1)
+with c4:
+    mn = st.number_input("Manganês (Mn)", step=0.1)
+with c5:
+    fe = st.number_input("Ferro (Fe)", step=0.1)
 
-# Fontes
-fontes = {
-    "N": {"Ureia": 0.46},
-    "P2O5": {"MAP": 0.52},
-    "K2O": {"KCl": 0.60}
-}
-
-if plantas_ha > 0:
-    st.info("📌 Doses calculadas em g/planta/ano")
-
-    n_g = (necessidade_npk["N"] * 100) / 0.46 / plantas_ha * 1000
-    p_g = (necessidade_npk["P2O5"] * 100) / 0.52 / plantas_ha * 1000
-    k_g = (necessidade_npk["K2O"] * 100) / 0.60 / plantas_ha * 1000
-
-    st.success(f"🌿 Nitrogênio (Ureia): {n_g:.1f} g/planta/ano")
-    st.success(f"🌱 Fósforo (MAP): {p_g:.1f} g/planta/ano")
-    st.success(f"🍃 Potássio (KCl): {k_g:.1f} g/planta/ano")
+st.markdown("### 🌾 Matéria Orgânica")
+mo = st.number_input("Matéria Orgânica (%)", step=0.1)
 
 # =====================================================
-# TABELA FINAL
+# 4️⃣ CORREÇÃO DO SOLO – AUTOMÁTICA
+# =====================================================
+st.header("🧪 Correção do Solo (automática)")
+
+PRNT = 90
+V_desejado = 70
+
+calcario_g_planta = 0
+gesso_g_planta = 0
+
+if T > 0 and plantas_ha > 0:
+    calcario_g_planta = (
+        (V_desejado - v_percent) * T / PRNT / 10000 * 1000 * 2
+    )
+    calcario_g_planta = max(calcario_g_planta, 0)
+
+    gesso_g_planta = calcario_g_planta * 0.30
+
+st.markdown("### 📊 Resultado da Correção")
+
+c1, c2 = st.columns(2)
+
+with c1:
+    if calcario_g_planta > 300:
+        st.warning(
+            f"Calcário total: **{calcario_g_planta:.0f} g/planta** → aplicar em **2 vezes** de "
+            f"{calcario_g_planta/2:.0f} g"
+        )
+    else:
+        st.success(f"Calcário: **{calcario_g_planta:.0f} g/planta**")
+
+with c2:
+    if gesso_g_planta > 200:
+        st.warning(
+            f"Gesso total: **{gesso_g_planta:.0f} g/planta** → aplicar em **2 vezes** de "
+            f"{gesso_g_planta/2:.0f} g"
+        )
+    else:
+        st.success(f"Gesso: **{gesso_g_planta:.0f} g/planta**")
+
+# =====================================================
+# 5️⃣ MODALIDADE DE APLICAÇÃO
+# =====================================================
+st.header("🚜 Modalidade de Aplicação")
+
+modalidade = st.selectbox(
+    "Escolha a modalidade",
+    ["Fertirrigação", "Manual"]
+)
+
+# =====================================================
+# 6️⃣ TABELA EDITÁVEL – CRONOGRAMA
 # =====================================================
 st.header("📅 Distribuição Anual de Adubação (editável)")
 
-meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
+meses = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+]
 
-df = pd.DataFrame({
-    "Ureia (g/planta)": [""]*12,
-    "MAP (g/planta)": [""]*12,
-    "KCl (g/planta)": [""]*12,
-    "Super S (ml/planta)": [""]*12,
-    "Multicafé Conilon (ml/planta)": [""]*12
-}, index=meses)
+if modalidade == "Fertirrigação":
+    dados = {
+        "Ureia 46% (g/planta)": [""] * 12,
+        "MAP (g/planta)": [""] * 12,
+        "Cloreto de Potássio (g/planta)": [""] * 12,
+        "Nitrato de Cálcio (g/planta)": [""] * 12,
+        "Sulfato de Magnésio (g/planta)": [""] * 12,
+        "Super S (ml/planta)": [""] * 12,
+        "Boro (ml/ha)": [""] * 12,
+        "Zinco (ml/ha)": [""] * 12,
+        "Multicafé Conilon (ml/ha)": [""] * 12,
+        "Matéria Orgânica (ml/ha)": [""] * 12,
+    }
+else:
+    dados = {
+        "19-04-19 (g/planta)": [""] * 12,
+        "20-10-05 (g/planta)": [""] * 12,
+        "Caltimag (g/planta)": [""] * 12,
+        "Super S (ml/planta)": [""] * 12,
+        "Boro (ml/ha)": [""] * 12,
+        "Zinco (ml/ha)": [""] * 12,
+        "Multicafé Conilon (ml/ha)": [""] * 12,
+        "Matéria Orgânica (ml/ha)": [""] * 12,
+    }
 
-st.data_editor(df, use_container_width=True)
+df = pd.DataFrame(dados, index=meses)
+
+st.info("✏️ Edite as doses diretamente na tabela.")
+
+st.data_editor(df, use_container_width=True, num_rows="fixed")
