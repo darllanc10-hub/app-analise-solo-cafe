@@ -1,11 +1,14 @@
 import streamlit as st
 import pandas as pd
 
+# =====================================================
+# CONFIGURAÇÃO
+# =====================================================
 st.set_page_config(page_title="Correção de Solo – Café", layout="wide")
 st.title("☕ Correção de Solo – Café")
 
 # =====================================================
-# CADASTRO
+# CADASTRO DO PRODUTOR
 # =====================================================
 st.header("👨‍🌾 Cadastro do Produtor")
 
@@ -18,7 +21,7 @@ with c3:
     municipio = st.text_input("Município")
 
 # =====================================================
-# ÁREA
+# DESCRIÇÃO DA ÁREA
 # =====================================================
 st.header("🌱 Descrição da Área")
 
@@ -33,7 +36,7 @@ with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
 
 # =====================================================
-# ANÁLISE
+# ANÁLISE DE SOLO
 # =====================================================
 st.header("🧪 Análise de Solo")
 
@@ -48,7 +51,7 @@ with c4:
     T = st.number_input("CTC a pH 7 (T) – cmolc/dm³", min_value=0.0)
 
 # =====================================================
-# CORREÇÃO AUTOMÁTICA
+# CORREÇÃO AUTOMÁTICA DE SOLO
 # =====================================================
 st.header("🧮 Correção do Solo")
 
@@ -57,24 +60,30 @@ calcario_g = 0.0
 gesso_g = 0.0
 
 if T > 0 and plantas_ha > 0 and v < 70:
-    # t/ha
+    # Cálculo em t/ha
     calcario_t_ha = (70 - v) * T / PRNT
 
-    # g/planta
+    # Conversão para g/planta
     calcario_g = (calcario_t_ha * 1_000_000) / plantas_ha
 
-    # gesso
+    # Gesso = 30% do calcário
     if m >= 10 or v <= 30:
         gesso_g = calcario_g * 0.30
 
+# =====================================================
+# FUNÇÃO DE PARCELAMENTO (AJUSTADA)
+# =====================================================
 def parcela(valor, limite):
     if valor > limite:
-        return "Dividir em 2 aplicações"
+        return "Aplicar em 2 parcelas no ano (50% agora e 50% após 6 meses)"
     elif valor > 0:
         return "Aplicação única"
     else:
         return "-"
 
+# =====================================================
+# RESULTADOS
+# =====================================================
 c1, c2 = st.columns(2)
 
 with c1:
@@ -87,3 +96,15 @@ with c2:
         st.caption(parcela(gesso_g, 200))
     else:
         st.metric("Gesso agrícola", "Não recomendado")
+
+st.info(
+    "📌 Calcário calculado por saturação de bases (V alvo = 70%).\n"
+    "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%.\n"
+    "📌 Parcelamento indica divisão da DOSE TOTAL anual, não reaplicação."
+)
+
+# =====================================================
+# TABELA (ETAPA SEGUINTE)
+# =====================================================
+st.header("📅 Distribuição Anual de Adubação")
+st.info("🔧 A correção automática de NPK, macros e micros será integrada na próxima etapa.")
