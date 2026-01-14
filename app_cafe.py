@@ -2,13 +2,9 @@ import streamlit as st
 import pandas as pd
 
 # =====================================================
-# CONFIGURAÇÃO GERAL
+# CONFIGURAÇÃO
 # =====================================================
-st.set_page_config(
-    page_title="Análise de Solo – Café",
-    layout="wide"
-)
-
+st.set_page_config(page_title="Análise de Solo – Café", layout="wide")
 st.title("☕ Análise de Solo e Adubação – Café")
 
 # =====================================================
@@ -46,175 +42,57 @@ st.header("🧪 Análise de Solo")
 
 st.markdown("### 📌 Parâmetros Químicos")
 
-c1, c2, c3 = st.columns(3)
+c1, c2, c3, c4 = st.columns(4)
 with c1:
     ph = st.number_input("pH", step=0.1)
 with c2:
-    v_percent = st.number_input("V% (Saturação por bases)", step=1.0)
+    v_percent = st.number_input("V% (Saturação por bases)", min_value=0.0, max_value=100.0, step=1.0)
 with c3:
-    m_percent = st.number_input(
-        "m% (Saturação por Alumínio)",
-        min_value=0.0,
-        max_value=100.0,
-        step=1.0
-    )
-
-st.markdown("### 🌱 Macronutrientes")
-
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1:
-    ca = st.number_input("Cálcio (Ca)", step=0.1)
-with c2:
-    mg = st.number_input("Magnésio (Mg)", step=0.1)
-with c3:
-    k = st.number_input("Potássio (K)", step=0.1)
+    m_percent = st.number_input("m% (Saturação por Alumínio)", min_value=0.0, max_value=100.0, step=1.0)
 with c4:
-    p = st.number_input("Fósforo (P)", step=0.1)
-with c5:
-    s = st.number_input("Enxofre (S)", step=0.1)
+    T = st.number_input("CTC a pH 7,0 (T) – cmolc/dm³", min_value=0.0, step=0.1)
 
-st.markdown("### 🧬 Micronutrientes")
-
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1:
-    b = st.number_input("Boro (B)", step=0.1)
-with c2:
-    zn = st.number_input("Zinco (Zn)", step=0.1)
-with c3:
-    cu = st.number_input("Cobre (Cu)", step=0.1)
-with c4:
-    mn = st.number_input("Manganês (Mn)", step=0.1)
-with c5:
-    fe = st.number_input("Ferro (Fe)", step=0.1)
-
-st.markdown("### 🌾 Matéria Orgânica")
-mo = st.number_input("Matéria Orgânica (%)", step=0.1)
-
-# Guarda análise (como já estava)
-st.session_state["analise_solo"] = {
-    "pH": ph,
-    "V%": v_percent,
-    "m%": m_percent,
-    "Ca": ca,
-    "Mg": mg,
-    "K": k,
-    "P": p,
-    "S": s,
-    "B": b,
-    "Zn": zn,
-    "Cu": cu,
-    "Mn": mn,
-    "Fe": fe,
-    "MO": mo
-}
 # =====================================================
 # 4️⃣ CORREÇÃO DO SOLO – AUTOMÁTICA
 # =====================================================
-st.header("🧪 Correção do Solo")
-
-# Entrada da CTC (T)
-T = st.number_input(
-    "CTC a pH 7,0 (T) – cmolc/dm³",
-    min_value=0.0,
-    step=0.1
-)
+st.header("🧮 Correção do Solo")
 
 calcario_g = 0.0
 gesso_g = 0.0
-parcelamento_calcario = ""
-parcelamento_gesso = ""
 
-if T > 0 and v_percent < 70:
-    calcario_g = ((70 - v_percent) * T / 90 / 10000) * 1000 * 2
+if T > 0:
+    if v_percent < 70:
+        calcario_g = ((70 - v_percent) * T / 90 / 10000) * 1000 * 2
 
-    if calcario_g > 300:
-        parcelamento_calcario = "➡️ Dividir em 2 aplicações"
-    else:
-        parcelamento_calcario = "➡️ Aplicação única"
-
-    if m_percent >= 10 or v_percent <= 30:
+    if calcario_g > 0 and (m_percent >= 10 or v_percent <= 30):
         gesso_g = calcario_g * 0.30
 
-        if gesso_g > 200:
-            parcelamento_gesso = "➡️ Dividir em 2 aplicações"
-        else:
-            parcelamento_gesso = "➡️ Aplicação única"
+# Parcelamento
+def parcelamento(valor, limite):
+    if valor > limite:
+        return "Dividir em 2 aplicações"
+    elif valor > 0:
+        return "Aplicação única"
+    else:
+        return "-"
 
 # RESULTADOS
 c1, c2 = st.columns(2)
 
 with c1:
-    st.metric(
-        "Calcário recomendado",
-        f"{calcario_g:.0f} g/planta"
-    )
-    if calcario_g > 0:
-        st.caption(parcelamento_calcario)
+    st.metric("Calcário recomendado", f"{calcario_g:.0f} g/planta")
+    st.caption(parcelamento(calcario_g, 300))
 
 with c2:
     if gesso_g > 0:
-        st.metric(
-            "Gesso agrícola recomendado",
-            f"{gesso_g:.0f} g/planta"
-        )
-        st.caption(parcelamento_gesso)
+        st.metric("Gesso agrícola recomendado", f"{gesso_g:.0f} g/planta")
+        st.caption(parcelamento(gesso_g, 200))
     else:
         st.metric("Gesso agrícola", "Não recomendado")
 
 # =====================================================
-# 5️⃣ MODALIDADE DE APLICAÇÃO
+# 5️⃣ TABELA (mantida para próxima etapa)
 # =====================================================
-st.header("🚜 Modalidade de Aplicação")
+st.header("📅 Distribuição Anual de Adubação")
 
-modalidade = st.selectbox(
-    "Escolha a modalidade",
-    ["Fertirrigação", "Manual"]
-)
-
-# =====================================================
-# 6️⃣ TABELA EDITÁVEL – CRONOGRAMA
-# =====================================================
-st.header("📅 Distribuição Anual de Adubação (editável)")
-
-meses = [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-]
-
-if modalidade == "Fertirrigação":
-    dados = {
-        "Ureia 46% (g/planta)": [""] * 12,
-        "MAP (g/planta)": [""] * 12,
-        "Cloreto de Potássio (g/planta)": [""] * 12,
-        "Nitrato de Cálcio (g/planta)": [""] * 12,
-        "Sulfato de Magnésio (g/planta)": [""] * 12,
-        "Boro (ml/ha)": [""] * 12,
-        "Zinco (ml/ha)": [""] * 12,
-        "Multicafé Conilon (ml/ha)": [""] * 12,
-        "Matéria Orgânica (ml/ha)": [""] * 12,
-    }
-else:
-    dados = {
-        "19-04-19 (g/planta)": [""] * 12,
-        "20-10-05 (g/planta)": [""] * 12,
-        "Caltimag (g/planta)": [""] * 12,
-        "Boro (ml/ha)": [""] * 12,
-        "Zinco (ml/ha)": [""] * 12,
-        "Multicafé Conilon (ml/ha)": [""] * 12,
-        "Matéria Orgânica (ml/ha)": [""] * 12,
-    }
-
-df = pd.DataFrame(dados, index=meses)
-
-st.info(
-    "✏️ Edite as doses diretamente na tabela. "
-    "Célula vazia = sem aplicação no mês."
-)
-
-df_editado = st.data_editor(
-    df,
-    use_container_width=True,
-    num_rows="fixed"
-)
-
-st.session_state["tabela_adubacao"] = df_editado
+st.info("🔧 A correção automática de NPK, macros e micros será ligada na próxima etapa.")
