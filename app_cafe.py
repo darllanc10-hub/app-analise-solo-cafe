@@ -107,17 +107,59 @@ st.session_state["analise_solo"] = {
     "Fe": fe,
     "MO": mo
 }
-
 # =====================================================
-# 4️⃣ CORREÇÃO DO SOLO (manual por enquanto)
+# 4️⃣ CORREÇÃO DO SOLO – AUTOMÁTICA
 # =====================================================
 st.header("🧪 Correção do Solo")
 
+# Entrada da CTC (T)
+T = st.number_input(
+    "CTC a pH 7,0 (T) – cmolc/dm³",
+    min_value=0.0,
+    step=0.1
+)
+
+calcario_g = 0.0
+gesso_g = 0.0
+parcelamento_calcario = ""
+parcelamento_gesso = ""
+
+if T > 0 and v_percent < 70:
+    calcario_g = ((70 - v_percent) * T / 90 / 10000) * 1000 * 2
+
+    if calcario_g > 300:
+        parcelamento_calcario = "➡️ Dividir em 2 aplicações"
+    else:
+        parcelamento_calcario = "➡️ Aplicação única"
+
+    if m_percent >= 10 or v_percent <= 30:
+        gesso_g = calcario_g * 0.30
+
+        if gesso_g > 200:
+            parcelamento_gesso = "➡️ Dividir em 2 aplicações"
+        else:
+            parcelamento_gesso = "➡️ Aplicação única"
+
+# RESULTADOS
 c1, c2 = st.columns(2)
+
 with c1:
-    calcario = st.number_input("Calcário (g/planta)", min_value=0.0)
+    st.metric(
+        "Calcário recomendado",
+        f"{calcario_g:.0f} g/planta"
+    )
+    if calcario_g > 0:
+        st.caption(parcelamento_calcario)
+
 with c2:
-    gesso = st.number_input("Gesso agrícola (g/planta)", min_value=0.0)
+    if gesso_g > 0:
+        st.metric(
+            "Gesso agrícola recomendado",
+            f"{gesso_g:.0f} g/planta"
+        )
+        st.caption(parcelamento_gesso)
+    else:
+        st.metric("Gesso agrícola", "Não recomendado")
 
 # =====================================================
 # 5️⃣ MODALIDADE DE APLICAÇÃO
