@@ -31,6 +31,10 @@ with c1:
 with c2:
     plantas_ha = st.number_input("Plantas por ha", min_value=1)
 with c3:
+    produtividade = st.selectbox(
+    "Produtividade esperada (sc/ha)",
+    list(range(10, 221, 10))
+    )
     variedade = st.text_input("Variedade")
 with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
