@@ -103,41 +103,6 @@ st.info(
     "📌 Parcelamento indica divisão da DOSE TOTAL anual, não reaplicação."
 )
 
-st.header("🌿 Nitrogênio (N)")
-
-produtividade = st.number_input(
-    "Produtividade esperada (sc/ha)",
-    min_value=10,
-    max_value=220,
-    step=1
-)
-
-# Tabela 5ª aproximação – necessidade de N (kg/ha)
-N_necessidade = 0
-
-for faixa, valor in {
-    (91,100):445, (101,110):470, (111,120):495,
-    (121,130):520, (131,140):540, (141,150):560,
-    (151,160):580, (161,170):595, (171,180):615,
-    (181,190):635, (191,200):655, (201,220):675
-}.items():
-    if faixa[0] <= produtividade <= faixa[1]:
-        N_necessidade = valor
-        break
-
-if N_necessidade > 0 and plantas_ha > 0:
-    ureia_kg_ha = N_necessidade * 100 / 46
-    ureia_g_planta_ano = (ureia_kg_ha * 1000) / plantas_ha
-
-    st.metric(
-        "Ureia 46% – Dose ANUAL",
-        f"{ureia_g_planta_ano:.0f} g/planta/ano"
-    )
-
-    st.caption(
-        f"N necessário: {N_necessidade} kg/ha | "
-        f"Ureia: {ureia_kg_ha:.0f} kg/ha"
-    )
 # =====================================================
 # TABELA (ETAPA SEGUINTE)
 # =====================================================
