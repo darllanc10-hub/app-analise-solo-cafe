@@ -46,7 +46,48 @@ gesso_g_planta = calcario_g_planta * 0.3
 st.subheader("📊 Correção do Solo")
 st.success(f"Calcário: {calcario_g_planta:.0f} g/planta")
 st.success(f"Gesso: {gesso_g_planta:.0f} g/planta")
+st.markdown("### ⚙️ Cálculo automático (opcional)")
 
+if st.button("Calcular calcário e gesso automaticamente"):
+    V2 = 70        # Saturação ideal para café
+    PRNT = 90      # PRNT do calcário
+    fator = 2      # fator agronômico que você utiliza
+
+    if V < V2:
+        # Fórmula conforme você usa no campo
+        calcario_kg_planta = ((V2 - V) * CTC) / PRNT / 10000 * fator
+        calcario_g_planta = calcario_kg_planta * 1000
+    else:
+        calcario_g_planta = 0
+
+    # Limite máximo anual
+    if calcario_g_planta > 300:
+        st.warning("Dose de calcário > 300 g/planta. Recomenda-se dividir em 2 aplicações.")
+
+    # Gesso: 30% do calcário
+    if m >= 10 or V <= 30:
+        gesso_g_planta = calcario_g_planta * 0.30
+    else:
+        gesso_g_planta = 0
+
+    if gesso_g_planta > 200:
+        st.warning("Dose de gesso > 200 g/planta. Recomenda-se dividir em 2 aplicações.")
+
+    # Atualiza os campos existentes
+    st.session_state["calcario"] = round(calcario_g_planta, 1)
+    st.session_state["gesso"] = round(gesso_g_planta, 1)
+
+st.number_input(
+    "Calcário (g/planta)",
+    min_value=0.0,
+    key="calcario"
+)
+
+st.number_input(
+    "Gesso agrícola (g/planta)",
+    min_value=0.0,
+    key="gesso"
+)
 # =========================
 # TABELA 5ª APROXIMAÇÃO
 # =========================
