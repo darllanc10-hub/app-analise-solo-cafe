@@ -102,41 +102,42 @@ st.info(
     "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%.\n"
     "📌 Parcelamento indica divisão da DOSE TOTAL anual, não reaplicação."
 )
-# =====================================================
-# NITROGÊNIO (AUTOMÁTICO – 5ª APROXIMAÇÃO)
-# =====================================================
+
 st.header("🌿 Nitrogênio (N)")
 
-# Tabela fixa – necessidade anual de N (kg/ha)
-tabela_N = {
-    10: 220, 20: 250, 30: 280, 40: 310, 50: 340,
-    60: 370, 70: 395, 80: 420, 90: 445,
-    100: 470, 110: 495, 120: 520, 130: 540,
-    140: 560, 150: 580, 160: 595,
-    170: 615, 180: 635, 190: 655,
-    200: 675, 220: 675
-}
-
-produtividade = st.selectbox(
-    "Produtividade (SC/ha)",
-    list(tabela_N.keys())
+produtividade = st.number_input(
+    "Produtividade esperada (sc/ha)",
+    min_value=10,
+    max_value=220,
+    step=1
 )
 
-# Necessidade anual de N
-N_kg_ha = tabela_N[produtividade]
+# Tabela 5ª aproximação – necessidade de N (kg/ha)
+N_necessidade = 0
 
-# Conversão para ureia 46%
-ureia_kg_ha = N_kg_ha * 100 / 46
+for faixa, valor in {
+    (91,100):445, (101,110):470, (111,120):495,
+    (121,130):520, (131,140):540, (141,150):560,
+    (151,160):580, (161,170):595, (171,180):615,
+    (181,190):635, (191,200):655, (201,220):675
+}.items():
+    if faixa[0] <= produtividade <= faixa[1]:
+        N_necessidade = valor
+        break
 
-# Conversão para g/planta/ano
-ureia_g_planta_ano = (ureia_kg_ha * 1000) / plantas_ha
+if N_necessidade > 0 and plantas_ha > 0:
+    ureia_kg_ha = N_necessidade * 100 / 46
+    ureia_g_planta_ano = (ureia_kg_ha * 1000) / plantas_ha
 
-st.metric(
-    "Ureia 46% (dose anual)",
-    f"{ureia_g_planta_ano:.0f} g/planta"
-)
+    st.metric(
+        "Ureia 46% – Dose ANUAL",
+        f"{ureia_g_planta_ano:.0f} g/planta/ano"
+    )
 
-st.caption("📌 Nitrogênio calculado exclusivamente pela produtividade (5ª aproximação).")
+    st.caption(
+        f"N necessário: {N_necessidade} kg/ha | "
+        f"Ureia: {ureia_kg_ha:.0f} kg/ha"
+    )
 # =====================================================
 # TABELA (ETAPA SEGUINTE)
 # =====================================================
