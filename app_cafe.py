@@ -102,7 +102,41 @@ st.info(
     "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%.\n"
     "📌 Parcelamento indica divisão da DOSE TOTAL anual, não reaplicação."
 )
+# =====================================================
+# NITROGÊNIO (AUTOMÁTICO – 5ª APROXIMAÇÃO)
+# =====================================================
+st.header("🌿 Nitrogênio (N)")
 
+# Tabela fixa – necessidade anual de N (kg/ha)
+tabela_N = {
+    10: 220, 20: 250, 30: 280, 40: 310, 50: 340,
+    60: 370, 70: 395, 80: 420, 90: 445,
+    100: 470, 110: 495, 120: 520, 130: 540,
+    140: 560, 150: 580, 160: 595,
+    170: 615, 180: 635, 190: 655,
+    200: 675, 220: 675
+}
+
+produtividade = st.selectbox(
+    "Produtividade (SC/ha)",
+    list(tabela_N.keys())
+)
+
+# Necessidade anual de N
+N_kg_ha = tabela_N[produtividade]
+
+# Conversão para ureia 46%
+ureia_kg_ha = N_kg_ha * 100 / 46
+
+# Conversão para g/planta/ano
+ureia_g_planta_ano = (ureia_kg_ha * 1000) / plantas_ha
+
+st.metric(
+    "Ureia 46% (dose anual)",
+    f"{ureia_g_planta_ano:.0f} g/planta"
+)
+
+st.caption("📌 Nitrogênio calculado exclusivamente pela produtividade (5ª aproximação).")
 # =====================================================
 # TABELA (ETAPA SEGUINTE)
 # =====================================================
