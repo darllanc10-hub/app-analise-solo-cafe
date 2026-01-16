@@ -25,7 +25,7 @@ with c3:
 # =====================================================
 st.header("🌱 Descrição da Área")
 
-c1, c2, c3, c4, c5 = st.columns(5)
+c1, c2, c3, c4 = st.columns(4)
 with c1:
     area = st.number_input("Área (ha)", min_value=0.0)
 with c2:
@@ -37,14 +37,6 @@ with c3:
     )
 with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
-with c5:
-    necessidade_n = st.number_input(
-        "Necessidade de Nitrogênio (kg/ha)",
-        min_value=0.0,
-        help="Valor retirado da tabela técnica (5ª aproximação)"
-    )
-
-variedade = st.text_input("Variedade")
 
 # =====================================================
 # ANÁLISE DE SOLO
@@ -79,7 +71,7 @@ if T > 0 and plantas_ha > 0 and v < 70:
 
 def parcela(valor, limite):
     if valor > limite:
-        return "Aplicar em 2 parcelas (50% agora e 50% após 6 meses)"
+        return "2 aplicações (50% agora e 50% após 6 meses)"
     elif valor > 0:
         return "Aplicação única"
     else:
@@ -87,55 +79,46 @@ def parcela(valor, limite):
 
 c1, c2 = st.columns(2)
 with c1:
-    st.metric("Calcário recomendado", f"{calcario_g:.0f} g/planta")
+    st.metric("Calcário", f"{calcario_g:.0f} g/planta")
     st.caption(parcela(calcario_g, 300))
 with c2:
+    st.metric("Gesso", f"{gesso_g:.0f} g/planta" if gesso_g > 0 else "Não recomendado")
     if gesso_g > 0:
-        st.metric("Gesso agrícola recomendado", f"{gesso_g:.0f} g/planta")
         st.caption(parcela(gesso_g, 200))
-    else:
-        st.metric("Gesso agrícola", "Não recomendado")
 
 # =====================================================
-# TABELA DE ADUBAÇÃO (COM NITROGÊNIO AUTOMÁTICO)
+# NECESSIDADES – VISUAL (TESTE)
 # =====================================================
-st.header("📅 Distribuição Anual de Adubação")
+st.header("📊 Necessidade Anual (visual para conferência)")
 
-meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-         "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
-
-# ---- CÁLCULO CORRETO DA UREIA ----
-ureia_g_planta_ano = 0.0
-if necessidade_n > 0 and plantas_ha > 0:
-    ureia_g_planta_ano = (
-        necessidade_n * 100 / 46 / plantas_ha * 1000
-    )
-
-ureia_mensal = ureia_g_planta_ano / 12 if ureia_g_planta_ano > 0 else ""
-
-dados = {
-    "Ureia 46% (g/planta)": [f"{ureia_mensal:.1f}" if ureia_mensal else "" for _ in meses],
-    "MAP / Petrum (g ou ml/planta)": ["" for _ in meses],
-    "Cloreto de Potássio (g/planta)": ["" for _ in meses],
-    "Cálcio (g/planta)": ["" for _ in meses],
-    "Magnésio (g/planta)": ["" for _ in meses],
-    "Super S – Enxofre (ml/planta)": ["" for _ in meses],
-    "Boro (ml/planta)": ["" for _ in meses],
-    "Zinco (ml/planta)": ["" for _ in meses],
-    "Multicafé Conilon (ml/planta)": ["" for _ in meses],
-    "Matéria Orgânica (ml/planta)": ["" for _ in meses],
+# --- TABELA DE NITROGÊNIO (kg/ha)
+tabela_N = {
+    10: 220, 20: 220, 30: 250, 40: 280, 50: 310,
+    60: 340, 70: 370, 80: 395, 90: 420,
+    100: 445, 110: 470, 120: 495, 130: 520,
+    140: 540, 150: 560, 160: 580, 170: 595,
+    180: 615, 190: 635, 200: 655, 210: 675, 220: 675
 }
 
-df = pd.DataFrame(dados, index=meses)
+necessidade_N = tabela_N.get(produtividade, 0)
 
-st.data_editor(
-    df,
-    use_container_width=True,
-    num_rows="fixed"
-)
+# Conversão para ureia 46%
+ureia_g_planta = 0
+if plantas_ha > 0:
+    ureia_g_planta = necessidade_N * 100 / 46 / plantas_ha * 1000
+
+# =====================================================
+# TABELA FINAL (SÓ PARA VISUALIZAR)
+# =====================================================
+df = pd.DataFrame({
+    "Nutriente": ["Nitrogênio (Ureia 46%)"],
+    "Dose anual": [f"{ureia_g_planta:.1f} g/planta"]
+})
+
+st.table(df)
 
 st.info(
-    "📌 Nitrogênio calculado a partir da NECESSIDADE (kg/ha) informada.\n"
-    "📌 Conversão automática para ureia 46% em g/planta/ano.\n"
-    "📌 Distribuição mensal igual — ajuste os meses como desejar."
+    "⚠️ Esta tabela é APENAS para conferência visual.\n"
+    "Nada foi distribuído por mês ainda.\n"
+    "Se os números baterem, avançamos. Se não, voltamos exatamente como estava."
 )
