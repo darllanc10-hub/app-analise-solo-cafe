@@ -25,7 +25,7 @@ with c3:
 # =====================================================
 st.header("🌱 Descrição da Área")
 
-c1, c2, c3, c4 = st.columns(4)
+c1, c2, c3, c4, c5 = st.columns(5)
 with c1:
     area = st.number_input("Área (ha)", min_value=0.0)
 with c2:
@@ -37,6 +37,12 @@ with c3:
     )
 with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
+with c5:
+    necessidade_n = st.number_input(
+        "Necessidade de Nitrogênio (kg/ha)",
+        min_value=0.0,
+        help="Valor retirado da tabela técnica (5ª aproximação)"
+    )
 
 variedade = st.text_input("Variedade")
 
@@ -56,7 +62,7 @@ with c4:
     T = st.number_input("CTC a pH 7 (T) – cmolc/dm³", min_value=0.0)
 
 # =====================================================
-# CORREÇÃO AUTOMÁTICA DE SOLO (FUNCIONAL)
+# CORREÇÃO DE SOLO (MANTIDA)
 # =====================================================
 st.header("🧮 Correção do Solo")
 
@@ -83,7 +89,6 @@ c1, c2 = st.columns(2)
 with c1:
     st.metric("Calcário recomendado", f"{calcario_g:.0f} g/planta")
     st.caption(parcela(calcario_g, 300))
-
 with c2:
     if gesso_g > 0:
         st.metric("Gesso agrícola recomendado", f"{gesso_g:.0f} g/planta")
@@ -92,15 +97,24 @@ with c2:
         st.metric("Gesso agrícola", "Não recomendado")
 
 # =====================================================
-# TABELA DE DISTRIBUIÇÃO ANUAL (BASE – SEM CÁLCULO)
+# TABELA DE ADUBAÇÃO (COM NITROGÊNIO AUTOMÁTICO)
 # =====================================================
 st.header("📅 Distribuição Anual de Adubação")
 
 meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
          "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
+# ---- CÁLCULO CORRETO DA UREIA ----
+ureia_g_planta_ano = 0.0
+if necessidade_n > 0 and plantas_ha > 0:
+    ureia_g_planta_ano = (
+        necessidade_n * 100 / 46 / plantas_ha * 1000
+    )
+
+ureia_mensal = ureia_g_planta_ano / 12 if ureia_g_planta_ano > 0 else ""
+
 dados = {
-    "Ureia 46% (g/planta)": ["" for _ in meses],
+    "Ureia 46% (g/planta)": [f"{ureia_mensal:.1f}" if ureia_mensal else "" for _ in meses],
     "MAP / Petrum (g ou ml/planta)": ["" for _ in meses],
     "Cloreto de Potássio (g/planta)": ["" for _ in meses],
     "Cálcio (g/planta)": ["" for _ in meses],
@@ -114,11 +128,14 @@ dados = {
 
 df = pd.DataFrame(dados, index=meses)
 
-st.info("✏️ A tabela será calculada automaticamente nas próximas etapas. "
-        "Por enquanto, serve como base estrutural e é totalmente editável.")
-
 st.data_editor(
     df,
     use_container_width=True,
     num_rows="fixed"
+)
+
+st.info(
+    "📌 Nitrogênio calculado a partir da NECESSIDADE (kg/ha) informada.\n"
+    "📌 Conversão automática para ureia 46% em g/planta/ano.\n"
+    "📌 Distribuição mensal igual — ajuste os meses como desejar."
 )
