@@ -1,42 +1,21 @@
 import streamlit as st
 import pandas as pd
 
-# =====================================================
-# CONFIGURAÇÃO
-# =====================================================
 st.set_page_config(page_title="Correção de Solo – Café", layout="wide")
-st.title("☕ Correção de Solo – Café")
+st.title("☕ Correção e Adubação – Café")
 
 # =====================================================
-# CADASTRO DO PRODUTOR
-# =====================================================
-st.header("👨‍🌾 Cadastro do Produtor")
-
-c1, c2, c3 = st.columns(3)
-with c1:
-    produtor = st.text_input("Produtor")
-with c2:
-    propriedade = st.text_input("Propriedade")
-with c3:
-    municipio = st.text_input("Município")
-
-# =====================================================
-# DESCRIÇÃO DA ÁREA
+# ÁREA E PRODUTIVIDADE
 # =====================================================
 st.header("🌱 Descrição da Área")
 
-c1, c2, c3, c4 = st.columns(4)
+c1, c2, c3 = st.columns(3)
 with c1:
-    area = st.number_input("Área (ha)", min_value=0.0)
-with c2:
     plantas_ha = st.number_input("Plantas por ha", min_value=1)
+with c2:
+    produtividade = st.selectbox("Produtividade esperada (sc/ha)", list(range(10,221,10)))
 with c3:
-    produtividade = st.selectbox(
-        "Produtividade esperada (sc/ha)",
-        list(range(10, 221, 10))
-    )
-with c4:
-    idade = st.number_input("Idade da lavoura (anos)", min_value=0)
+    T = st.number_input("CTC (T) – cmolc/dm³", min_value=0.0)
 
 # =====================================================
 # ANÁLISE DE SOLO
@@ -45,110 +24,107 @@ st.header("🧪 Análise de Solo")
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    ph = st.number_input("pH", step=0.1)
+    v = st.number_input("V%", 0.0, 100.0)
 with c2:
-    v = st.number_input("V% (Saturação por bases)", min_value=0.0, max_value=100.0)
+    m = st.number_input("m%", 0.0, 100.0)
 with c3:
-    m = st.number_input("m% (Saturação por Alumínio)", min_value=0.0, max_value=100.0)
+    p_rem = st.number_input("P_rem")
 with c4:
-    T = st.number_input("CTC a pH 7 (T) – cmolc/dm³", min_value=0.0)
+    k_teor = st.number_input("K")
 
 # =====================================================
-# CÁLCULO AUTOMÁTICO DE NITROGÊNIO (5ª APROXIMAÇÃO)
+# CALAGEM E GESSAGEM
 # =====================================================
+PRNT = 90
 
-st.header("🌿 Nitrogênio – Cálculo Automático")
+calcario_t_ha = max(0, (70 - v) * T / PRNT)
+calcario_g_planta = (calcario_t_ha * 1_000_000) / plantas_ha
 
-# Tabela oficial de necessidade de N (kg/ha)
+gesso_g_planta = calcario_g_planta * 0.30 if (m >= 10 or v <= 30) else 0
+
+st.header("🧮 Correção do Solo")
+
+st.metric("Calcário", f"{calcario_g_planta:.0f} g/planta")
+st.metric("Gesso", f"{gesso_g_planta:.0f} g/planta")
+
+# =====================================================
+# NITROGÊNIO
+# =====================================================
 tabela_N = {
-    20:220, 30:250, 40:280, 50:310, 60:340, 70:370, 80:395, 90:420,
-    100:445, 110:470, 120:495, 130:520, 140:540, 150:560, 160:580,
-    170:595, 180:615, 190:635, 200:655, 210:675, 220:675
+20:220,30:250,40:280,50:310,60:340,70:370,80:395,90:420,
+100:445,110:470,120:495,130:520,140:540,150:560,160:580,
+170:595,180:615,190:635,200:655,210:675,220:675
 }
 
-# pega o valor mais próximo da produtividade escolhida
 prod_ref = max([k for k in tabela_N if produtividade >= k])
 necessidade_N = tabela_N[prod_ref]
 
-# Produto comercial utilizado
-ureia_percent = 46
-
-# Conversão para ureia kg/ha
-ureia_kg_ha = necessidade_N * 100 / ureia_percent
-
-# Conversão para g/planta/ano
-ureia_g_planta = (ureia_kg_ha / plantas_ha) * 1000
-
-st.metric("Necessidade de N", f"{necessidade_N} kg/ha")
-st.metric("Ureia recomendada", f"{ureia_g_planta:.0f} g/planta/ano")
-
-st.info("📌 Esse valor é a dose TOTAL anual por planta. Distribua nos meses desejados.")
-# =====================================================
-# CORREÇÃO DE SOLO (MANTIDA)
-# =====================================================
-st.header("🧮 Correção do Solo")
-
-PRNT = 90
-calcario_g = 0.0
-gesso_g = 0.0
-
-if T > 0 and plantas_ha > 0 and v < 70:
-    calcario_t_ha = (70 - v) * T / PRNT
-    calcario_g = (calcario_t_ha * 1_000_000) / plantas_ha
-
-    if m >= 10 or v <= 30:
-        gesso_g = calcario_g * 0.30
-
-def parcela(valor, limite):
-    if valor > limite:
-        return "2 aplicações (50% agora e 50% após 6 meses)"
-    elif valor > 0:
-        return "Aplicação única"
-    else:
-        return "-"
-
-c1, c2 = st.columns(2)
-with c1:
-    st.metric("Calcário", f"{calcario_g:.0f} g/planta")
-    st.caption(parcela(calcario_g, 300))
-with c2:
-    st.metric("Gesso", f"{gesso_g:.0f} g/planta" if gesso_g > 0 else "Não recomendado")
-    if gesso_g > 0:
-        st.caption(parcela(gesso_g, 200))
+ureia_g_planta = (necessidade_N * 100 / 46 / plantas_ha) * 1000
 
 # =====================================================
-# NECESSIDADES – VISUAL (TESTE)
+# POTÁSSIO
 # =====================================================
-st.header("📊 Necessidade Anual (visual para conferência)")
-
-# --- TABELA DE NITROGÊNIO (kg/ha)
-tabela_N = {
-    10: 220, 20: 220, 30: 250, 40: 280, 50: 310,
-    60: 340, 70: 370, 80: 395, 90: 420,
-    100: 445, 110: 470, 120: 495, 130: 520,
-    140: 540, 150: 560, 160: 580, 170: 595,
-    180: 615, 190: 635, 200: 655, 210: 675, 220: 675
+tabela_K = {
+20:220,30:250,40:280,50:310,60:340,70:370,80:395,90:420,
+100:445,110:470,120:495,130:520,140:540,150:560,160:580,
+170:595,180:615,190:635,200:655,210:675,220:675
 }
 
-necessidade_N = tabela_N.get(produtividade, 0)
+necessidade_K = tabela_K[prod_ref]
 
-# Conversão para ureia 46%
-ureia_g_planta = 0
-if plantas_ha > 0:
-    ureia_g_planta = necessidade_N * 100 / 46 / plantas_ha * 1000
+kcl_g_planta = (necessidade_K * 100 / 60 / plantas_ha) * 1000
+fert26_g_planta = (necessidade_K * 100 / 26 / plantas_ha) * 1000
 
 # =====================================================
-# TABELA FINAL (SÓ PARA VISUALIZAR)
+# FÓSFORO
 # =====================================================
-df = pd.DataFrame({
-    "Nutriente": ["Nitrogênio (Ureia 46%)"],
-    "Dose anual": [f"{ureia_g_planta:.1f} g/planta"]
-})
+if p_rem <= 10:
+    necessidade_P = 30
+elif p_rem <= 30:
+    necessidade_P = 40
+elif p_rem <= 60:
+    necessidade_P = 50
+else:
+    necessidade_P = 0
 
-st.table(df)
+map_g_planta = (necessidade_P * 100 / 60 / plantas_ha) * 1000
+petrum_ml_planta = map_g_planta * 0.10
 
-st.info(
-    "⚠️ Esta tabela é APENAS para conferência visual.\n"
-    "Nada foi distribuído por mês ainda.\n"
-    "Se os números baterem, avançamos. Se não, voltamos exatamente como estava."
-)
+# =====================================================
+# CÁLCIO E MAGNÉSIO
+# =====================================================
+tabela_Ca = {20:20,50:50,100:85,150:109,200:131}
+tabela_Mg = {20:6.66,50:16.66,100:28.33,150:36.66,200:44.99}
+
+prod_ca = max([k for k in tabela_Ca if produtividade >= k])
+necessidade_Ca = tabela_Ca[prod_ca]
+necessidade_Mg = tabela_Mg[prod_ca]
+
+calcimag_g_planta = ((necessidade_Ca+necessidade_Mg)*100/100/plantas_ha)*1000
+
+# =====================================================
+# ENXOFRE LÍQUIDO
+# =====================================================
+if p_rem <= 10:
+    necessidade_S = 1.92
+elif p_rem <= 30:
+    necessidade_S = 3.7
+elif p_rem <= 60:
+    necessidade_S = 7.0
+else:
+    necessidade_S = 0
+
+superS_ml_planta = (necessidade_S * 1000) / plantas_ha
+
+# =====================================================
+# RESULTADOS
+# =====================================================
+st.header("📊 Resultado da Adubação por Planta")
+
+st.metric("Ureia (46%)", f"{ureia_g_planta:.0f} g/planta/ano")
+st.metric("KCl (60%)", f"{kcl_g_planta:.0f} g/planta/ano")
+st.metric("26-00-26", f"{fert26_g_planta:.0f} g/planta/ano")
+st.metric("MAP (60%)", f"{map_g_planta:.0f} g/planta/ano")
+st.metric("Petrum", f"{petrum_ml_planta:.1f} ml/planta")
+st.metric("Caltimag", f"{calcimag_g_planta:.0f} g/planta/ano")
+st.metric("Super S", f"{superS_ml_planta:.1f} ml/planta")
