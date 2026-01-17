@@ -1,9 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-# =====================================================
-# CONFIGURAÇÃO
-# =====================================================
 st.set_page_config(page_title="Correção de Solo – Café", layout="wide")
 st.title("☕ Correção de Solo – Café")
 
@@ -31,6 +28,10 @@ with c1:
 with c2:
     plantas_ha = st.number_input("Plantas por ha", min_value=1)
 with c3:
+    produtividade = st.selectbox(
+        "Produtividade esperada (sc/ha)",
+        list(range(10, 221, 10))
+    )
     variedade = st.text_input("Variedade")
 with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
@@ -51,24 +52,23 @@ with c4:
     T = st.number_input("CTC a pH 7 (T) – cmolc/dm³", min_value=0.0)
 
 # =====================================================
-# CORREÇÃO AUTOMÁTICA
+# CORREÇÃO DO SOLO (SUA FÓRMULA)
 # =====================================================
 st.header("🧮 Correção do Solo")
 
 PRNT = 90
+
 calcario_g = 0.0
 gesso_g = 0.0
 
 if T > 0 and v < 70:
-    # Fórmula que você passou:
-    calcario_g = ((70 - v) * T / PRNT) / 10000 * 1000 * 2
+    calcario_g = ((70 - v) * T / PRNT / 10000 * 1000 * 2) * 1000  # resultado final em g/planta
 
-    # Regra do gesso conforme seu critério:
     if m >= 10 or v <= 30:
         gesso_g = calcario_g * 0.30
 
 # =====================================================
-# PARCELAMENTO
+# PARCELAMENTO AUTOMÁTICO
 # =====================================================
 def parcela(valor, limite):
     if valor > limite:
@@ -95,13 +95,13 @@ with c2:
         st.metric("Gesso agrícola", "Não recomendado")
 
 st.info(
-    "📌 Cálculo conforme metodologia da 5ª aproximação.\n"
-    "📌 Calcário baseado em saturação de bases (V alvo = 70%).\n"
-    "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%."
+    "📌 Calcário calculado para elevar V% até 70%.\n"
+    "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%.\n"
+    "📌 Parcelamento indica divisão da dose total anual."
 )
 
 # =====================================================
-# PRÓXIMA ETAPA
+# TABELA FUTURA
 # =====================================================
 st.header("📅 Distribuição Anual de Adubação")
-st.info("🔧 Próxima etapa: correção automática de NPK, macros e micros.")
+st.info("🔧 A correção automática de NPK, macros e micros será integrada na próxima etapa.")
