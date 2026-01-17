@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 
 st.set_page_config(page_title="Correção de Solo – Café", layout="wide")
 st.title("☕ Correção de Solo – Café")
@@ -22,19 +21,13 @@ with c3:
 # =====================================================
 st.header("🌱 Descrição da Área")
 
-c1, c2, c3, c4 = st.columns(4)
+c1, c2, c3 = st.columns(3)
 with c1:
     area = st.number_input("Área (ha)", min_value=0.0)
 with c2:
     plantas_ha = st.number_input("Plantas por ha", min_value=1)
 with c3:
-    produtividade = st.selectbox(
-        "Produtividade esperada (sc/ha)",
-        list(range(10, 221, 10))
-    )
     variedade = st.text_input("Variedade")
-with c4:
-    idade = st.number_input("Idade da lavoura (anos)", min_value=0)
 
 # =====================================================
 # ANÁLISE DE SOLO
@@ -67,38 +60,9 @@ if T > 0 and plantas_ha > 0 and v < 70:
     if m >= 10 or v <= 30:
         gesso_g = calcario_g * 0.30
 
-# =====================================================
-# NITROGÊNIO (UREIA 46%)
-# =====================================================
-
-tabela_n = {
-20: 220, 30: 250, 40: 280, 50: 310, 60: 340, 70: 370, 80: 395,
-90: 420, 100: 445, 110: 470, 120: 495, 130: 520, 140: 540,
-150: 560, 160: 580, 170: 595, 180: 615, 190: 635, 200: 655, 220: 675
-}
-
-def necessidade_n(prod):
-    for limite, valor in tabela_n.items():
-        if prod <= limite:
-            return valor
-    return 675
-
-n_kg_ha = necessidade_n(produtividade)
-
-# Fórmula que você passou:
-# Necessidade x 100 ÷ %N ÷ plantas/ha x 1000 = g/planta/ano
-ureia_g_planta = (n_kg_ha * 100 / 46 / plantas_ha) * 1000
-# Necessidade de N (kg/ha) conforme produtividade
-necessidade_n = tabela_nitrogenio.get(produtividade, 0)
-
-# Conversão para Ureia 46% e cálculo por planta
-ureia_g_planta = (necessidade_n * 100 / 46 / plantas_ha) * 1000
-# =====================================================
-# FUNÇÃO DE PARCELAMENTO
-# =====================================================
 def parcela(valor, limite):
     if valor > limite:
-        return "Aplicar em 2 parcelas no ano (50% agora e 50% após 6 meses)"
+        return "Aplicar em 2 parcelas (50% agora e 50% após 6 meses)"
     elif valor > 0:
         return "Aplicação única"
     else:
@@ -107,7 +71,7 @@ def parcela(valor, limite):
 # =====================================================
 # RESULTADOS
 # =====================================================
-c1, c2, c3 = st.columns(3)
+c1, c2 = st.columns(2)
 
 with c1:
     st.metric("Calcário recomendado", f"{calcario_g:.0f} g/planta")
@@ -120,17 +84,7 @@ with c2:
     else:
         st.metric("Gesso agrícola", "Não recomendado")
 
-with c3:
-    st.metric("Nitrogênio recomendado (Uréia 46%)", f"{ureia_g_planta:.0f} g/planta/ano")
-
 st.info(
-    "📌 Calcário calculado por saturação de bases (V alvo = 70%).\n"
-    "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%.\n"
-    "📌 Nitrogênio calculado pela produtividade e convertido para Uréia 46%."
+    "📌 Calcário para correção de pH e saturação de bases (V alvo = 70%)\n"
+    "📌 Gesso = 30% da dose de calcário quando m ≥ 10% ou V ≤ 30%"
 )
-
-# =====================================================
-# TABELA
-# =====================================================
-st.header("📅 Distribuição Anual de Adubação")
-st.info("🔧 A correção automática de P, K, Ca, Mg e micros será integrada na próxima etapa.")
