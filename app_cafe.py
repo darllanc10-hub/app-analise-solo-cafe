@@ -54,6 +54,36 @@ with c4:
     T = st.number_input("CTC a pH 7 (T) – cmolc/dm³", min_value=0.0)
 
 # =====================================================
+# CÁLCULO AUTOMÁTICO DE NITROGÊNIO (5ª APROXIMAÇÃO)
+# =====================================================
+
+st.header("🌿 Nitrogênio – Cálculo Automático")
+
+# Tabela oficial de necessidade de N (kg/ha)
+tabela_N = {
+    20:220, 30:250, 40:280, 50:310, 60:340, 70:370, 80:395, 90:420,
+    100:445, 110:470, 120:495, 130:520, 140:540, 150:560, 160:580,
+    170:595, 180:615, 190:635, 200:655, 210:675, 220:675
+}
+
+# pega o valor mais próximo da produtividade escolhida
+prod_ref = max([k for k in tabela_N if produtividade >= k])
+necessidade_N = tabela_N[prod_ref]
+
+# Produto comercial utilizado
+ureia_percent = 46
+
+# Conversão para ureia kg/ha
+ureia_kg_ha = necessidade_N * 100 / ureia_percent
+
+# Conversão para g/planta/ano
+ureia_g_planta = (ureia_kg_ha / plantas_ha) * 1000
+
+st.metric("Necessidade de N", f"{necessidade_N} kg/ha")
+st.metric("Ureia recomendada", f"{ureia_g_planta:.0f} g/planta/ano")
+
+st.info("📌 Esse valor é a dose TOTAL anual por planta. Distribua nos meses desejados.")
+# =====================================================
 # CORREÇÃO DE SOLO (MANTIDA)
 # =====================================================
 st.header("🧮 Correção do Solo")
