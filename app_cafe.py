@@ -88,7 +88,11 @@ n_kg_ha = necessidade_n(produtividade)
 # Fórmula que você passou:
 # Necessidade x 100 ÷ %N ÷ plantas/ha x 1000 = g/planta/ano
 ureia_g_planta = (n_kg_ha * 100 / 46 / plantas_ha) * 1000
+# Necessidade de N (kg/ha) conforme produtividade
+necessidade_n = tabela_nitrogenio.get(produtividade, 0)
 
+# Conversão para Ureia 46% e cálculo por planta
+ureia_g_planta = (necessidade_n * 100 / 46 / plantas_ha) * 1000
 # =====================================================
 # FUNÇÃO DE PARCELAMENTO
 # =====================================================
