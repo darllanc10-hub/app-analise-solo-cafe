@@ -1,5 +1,9 @@
 import streamlit as st
+import pandas as pd
 
+# =====================================================
+# CONFIGURAÇÃO
+# =====================================================
 st.set_page_config(page_title="Correção de Solo – Café", layout="wide")
 st.title("☕ Correção de Solo – Café")
 
@@ -47,7 +51,7 @@ with c4:
     T = st.number_input("CTC a pH 7 (T) – cmolc/dm³", min_value=0.0)
 
 # =====================================================
-# CÁLCULO DO CALCÁRIO E GESSO
+# CORREÇÃO AUTOMÁTICA
 # =====================================================
 st.header("🧮 Correção do Solo")
 
@@ -55,15 +59,16 @@ PRNT = 90
 calcario_g = 0.0
 gesso_g = 0.0
 
-if T > 0 and plantas_ha > 0 and v < 70:
-    calcario_t_ha = (70 - v) * T / PRNT
-    calcario_g = (calcario_t_ha * 1_000_000) / plantas_ha
+if T > 0 and v < 70:
+    # Fórmula que você passou:
+    calcario_g = ((70 - v) * T / PRNT) / 10000 * 1000 * 2
 
+    # Regra do gesso conforme seu critério:
     if m >= 10 or v <= 30:
         gesso_g = calcario_g * 0.30
 
 # =====================================================
-# FUNÇÃO DE PARCELAMENTO
+# PARCELAMENTO
 # =====================================================
 def parcela(valor, limite):
     if valor > limite:
@@ -90,7 +95,13 @@ with c2:
         st.metric("Gesso agrícola", "Não recomendado")
 
 st.info(
-    "📌 Calcário calculado para elevar V% até 70%.\n"
-    "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%.\n"
-    "📌 Parcelamento indica divisão da dose total anual."
+    "📌 Cálculo conforme metodologia da 5ª aproximação.\n"
+    "📌 Calcário baseado em saturação de bases (V alvo = 70%).\n"
+    "📌 Gesso = 30% do calcário quando m ≥ 10% ou V ≤ 30%."
 )
+
+# =====================================================
+# PRÓXIMA ETAPA
+# =====================================================
+st.header("📅 Distribuição Anual de Adubação")
+st.info("🔧 Próxima etapa: correção automática de NPK, macros e micros.")
