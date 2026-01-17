@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 
+# =====================================================
+# CONFIGURAÇÃO
+# =====================================================
 st.set_page_config(page_title="Correção de Solo – Café", layout="wide")
 st.title("☕ Correção de Solo – Café")
 
@@ -8,7 +11,6 @@ st.title("☕ Correção de Solo – Café")
 # CADASTRO DO PRODUTOR
 # =====================================================
 st.header("👨‍🌾 Cadastro do Produtor")
-
 c1, c2, c3 = st.columns(3)
 with c1:
     produtor = st.text_input("Produtor")
@@ -21,17 +23,12 @@ with c3:
 # DESCRIÇÃO DA ÁREA
 # =====================================================
 st.header("🌱 Descrição da Área")
-
 c1, c2, c3, c4 = st.columns(4)
 with c1:
     area = st.number_input("Área (ha)", min_value=0.0)
 with c2:
     plantas_ha = st.number_input("Plantas por ha", min_value=1)
 with c3:
-    produtividade = st.selectbox(
-        "Produtividade esperada (sc/ha)",
-        list(range(10, 221, 10))
-    )
     variedade = st.text_input("Variedade")
 with c4:
     idade = st.number_input("Idade da lavoura (anos)", min_value=0)
@@ -40,7 +37,6 @@ with c4:
 # ANÁLISE DE SOLO
 # =====================================================
 st.header("🧪 Análise de Solo")
-
 c1, c2, c3, c4 = st.columns(4)
 with c1:
     ph = st.number_input("pH", step=0.1)
@@ -52,23 +48,24 @@ with c4:
     T = st.number_input("CTC a pH 7 (T) – cmolc/dm³", min_value=0.0)
 
 # =====================================================
-# CORREÇÃO DO SOLO (SUA FÓRMULA)
+# CÁLCULO DE CALCÁRIO E GESSO
 # =====================================================
 st.header("🧮 Correção do Solo")
 
 PRNT = 90
-
-calcario_g = 0.0
-gesso_g = 0.0
+calcario = 0.0
+gesso = 0.0
 
 if T > 0 and v < 70:
-    calcario_g = ((70 - v) * T / PRNT / 10000 * 1000 * 2) * 1000  # resultado final em g/planta
-
+    # Fórmula conforme você descreveu
+    calcario = ((70 - v) * T / PRNT / 10000 * 1000 * 2)
+    
+    # Gesso = 30% do calcário quando m >=10 ou V <= 30
     if m >= 10 or v <= 30:
-        gesso_g = calcario_g * 0.30
+        gesso = calcario * 0.30
 
 # =====================================================
-# PARCELAMENTO AUTOMÁTICO
+# FUNÇÃO DE PARCELAMENTO
 # =====================================================
 def parcela(valor, limite):
     if valor > limite:
@@ -84,13 +81,13 @@ def parcela(valor, limite):
 c1, c2 = st.columns(2)
 
 with c1:
-    st.metric("Calcário recomendado", f"{calcario_g:.0f} g/planta")
-    st.caption(parcela(calcario_g, 300))
+    st.metric("Calcário recomendado", f"{calcario*1000:.0f} g/planta")
+    st.caption(parcela(calcario*1000, 300))
 
 with c2:
-    if gesso_g > 0:
-        st.metric("Gesso agrícola recomendado", f"{gesso_g:.0f} g/planta")
-        st.caption(parcela(gesso_g, 200))
+    if gesso > 0:
+        st.metric("Gesso agrícola recomendado", f"{gesso*1000:.0f} g/planta")
+        st.caption(parcela(gesso*1000, 200))
     else:
         st.metric("Gesso agrícola", "Não recomendado")
 
