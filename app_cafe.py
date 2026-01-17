@@ -54,8 +54,7 @@ calcario_g = 0.0
 gesso_g = 0.0
 
 if T > 0 and plantas_ha > 0 and v < 70:
-    calcario_t_ha = (70 - v) * T / PRNT
-    calcario_g = (calcario_t_ha * 1_000_000) / plantas_ha
+    calcario_g = ((70 - v) * T / 90 / 10000) * 1000 * 2
 
     if m >= 10 or v <= 30:
         gesso_g = calcario_g * 0.30
